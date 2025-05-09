@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,34 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+        // Custom BinSavvy eco-friendly colors
+        binsavvy: {
+          50: '#f2f9f4',
+          100: '#e1f0e3',
+          200: '#c4e1ca',
+          300: '#96c9a5',
+          400: '#64aa79',
+          500: '#3c8c58', // Primary green
+          600: '#2d7149',
+          700: '#265b3d',
+          800: '#224834',
+          900: '#1d3c2c',
+          950: '#0c211a',
+        },
+        waste: {
+          50: '#f1f8fe',
+          100: '#e2effc',
+          200: '#cbe1f9',
+          300: '#a9cbf4',
+          400: '#80abec',
+          500: '#5d85e4', // Primary blue
+          600: '#4363d8',
+          700: '#3751c2',
+          800: '#31459c',
+          900: '#2d3a7b',
+          950: '#1f244a',
+        },
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +112,21 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					from: { opacity: '0' },
+					to: { opacity: '1' }
+				},
+				'fade-out': {
+					from: { opacity: '1' },
+					to: { opacity: '0' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'fade-out': 'fade-out 0.3s ease-out'
 			}
 		}
 	},
