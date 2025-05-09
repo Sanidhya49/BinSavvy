@@ -26,6 +26,24 @@ const LoginForm = ({ onToggleForm }: LoginFormProps) => {
     }
   };
 
+  const loginAsAdmin = async () => {
+    try {
+      await login("admin@binsavvy.com", "password");
+      toast.success("Admin login successful!");
+    } catch (err) {
+      // Error handling is done in the auth context
+    }
+  };
+
+  const loginAsUser = async () => {
+    try {
+      await login("user@binsavvy.com", "password");
+      toast.success("User login successful!");
+    } catch (err) {
+      // Error handling is done in the auth context
+    }
+  };
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -67,6 +85,34 @@ const LoginForm = ({ onToggleForm }: LoginFormProps) => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+          </div>
+          
+          <div className="pt-2 space-y-2">
+            <div className="text-sm text-center text-muted-foreground">
+              Quick Login Shortcuts
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Button 
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-sm"
+                onClick={loginAsAdmin}
+                disabled={loading}
+              >
+                Login as Admin
+              </Button>
+              <Button 
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-sm"
+                onClick={loginAsUser}
+                disabled={loading}
+              >
+                Login as User
+              </Button>
+            </div>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
