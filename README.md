@@ -1,73 +1,55 @@
-# Welcome to your Lovable project
+# BinSavvy: Smart Waste Analysis Platform
 
-## Project info
+## Project Info
 
-**URL**: https://lovable.dev/projects/a940553e-afad-4822-bd0b-b079afc16582
+BinSavvy is a web platform for smart waste analysis. Users can upload images of waste in their surroundings, and administrators can analyze these images using AI models for instance segmentation and object detection.
 
-## How can I edit this code?
+## Features
+- User registration, login, and dashboard
+- Image upload with location and timestamp
+- Admin dashboard for managing uploads and running ML models
+- Instance segmentation and object detection (YOLOv8)
+- Data visualization and insights
 
-There are several ways of editing your application.
+## Tech Stack
+- Frontend: React, TypeScript, Vite, shadcn-ui, Tailwind CSS
+- Backend: Django, Django REST Framework, Celery, PostgreSQL, AWS S3
+- ML: YOLOv8 (ultralytics)
 
-**Use Lovable**
+## Getting Started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a940553e-afad-4822-bd0b-b079afc16582) and start prompting.
+### Prerequisites
+- Node.js & npm
+- Python 3.10+
+- PostgreSQL
+- Redis (for Celery)
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+### Frontend Setup
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Backend Setup
+```sh
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+pip install -r requirements.txt
+# Set up .env file with your credentials
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Running the App
+- Start Redis server
+- Start Celery worker: `celery -A binsavvy worker -l info`
+- Start Django server: `python manage.py runserver`
+- Start frontend: `npm run dev`
 
-**Use GitHub Codespaces**
+## Deployment
+- Use Docker Compose or your preferred cloud provider
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/a940553e-afad-4822-bd0b-b079afc16582) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+MIT
