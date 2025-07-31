@@ -3,6 +3,32 @@ import cloudinary.uploader
 import cloudinary.api
 import os
 from django.conf import settings
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+class CloudinaryConfig:
+    """Cloudinary configuration class"""
+    
+    def __init__(self):
+        self.cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME')
+        self.api_key = os.getenv('CLOUDINARY_API_KEY')
+        self.api_secret = os.getenv('CLOUDINARY_API_SECRET')
+        
+        # Configure Cloudinary
+        cloudinary.config(
+            cloud_name=self.cloud_name,
+            api_key=self.api_key,
+            api_secret=self.api_secret
+        )
+    
+    def is_configured(self):
+        """Check if Cloudinary is properly configured"""
+        return all([self.cloud_name, self.api_key, self.api_secret])
+
+# Create global instance
+cloudinary_config = CloudinaryConfig()
 
 def configure_cloudinary():
     """Configure Cloudinary with environment variables"""

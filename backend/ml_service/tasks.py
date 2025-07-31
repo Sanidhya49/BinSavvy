@@ -1,76 +1,217 @@
+import os
+import tempfile
+import base64
 from celery import shared_task
+import django
+from django.conf import settings
 from ultralytics import YOLO
 import cv2
 import numpy as np
-from django.conf import settings
-from images.models import ImageUpload
-import os
+from PIL import Image
+import io
+import cloudinary
+import cloudinary.uploader
+from cloudinary_config import cloudinary_config
+from roboflow_config import roboflow_config
+
+# Configure Django settings for Celery tasks
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'binsavvy.settings')
+django.setup()
 
 @shared_task
-def process_image(image_id):
+def process_image_with_roboflow(image_id: str, image_data: str, location: str = ""):
+    """
+    Process image using Roboflow waste detection model
+    
+    Args:
+        image_id: Unique identifier for the image
+        image_data: Base64 encoded image data
+        location: Location where image was taken
+    """
     try:
-        # Get the image upload instance
-        image_upload = ImageUpload.objects.get(id=image_id)
-        image_upload.status = 'processing'
-        image_upload.save()
-
-        # Load YOLO model
-        model = YOLO('yolov8n-seg.pt')  # Using YOLOv8 nano model with segmentation
-
-        # Read image
-        image_path = image_upload.image.path
-        img = cv2.imread(image_path)
+        # Decode base64 image data
+        if ',' in image_data:
+            image_data = image_data.split(',')[1]
         
-        # Run inference
-        results = model(img)
+        image_bytes = base64.b64decode(image_data)
         
-        # Process results
-        result = results[0]
-        masks = result.masks
-        boxes = result.boxes
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
+            temp_file.write(image_bytes)
+            temp_file_path = temp_file.name
         
-        # Create visualization
-        if masks is not None:
-            # Create mask overlay
-            mask_overlay = np.zeros_like(img)
-            for mask in masks.data:
-                mask_overlay[mask.cpu().numpy() > 0.5] = [0, 255, 0]  # Green overlay
+        try:
+            # Upload to Cloudinary first
+            cloudinary_result = cloudinary.uploader.upload(
+                temp_file_path,
+                folder="binsavvy/waste_images",
+                public_id=f"waste_{image_id}",
+                overwrite=True
+            )
             
-            # Blend original image with mask overlay
-            alpha = 0.5
-            output = cv2.addWeighted(img, 1, mask_overlay, alpha, 0)
+            # Get Cloudinary URL
+            cloudinary_url = cloudinary_result['secure_url']
             
-            # Save processed image
-            processed_path = os.path.join(settings.MEDIA_ROOT, 'processed', f'{image_id}_processed.jpg')
-            os.makedirs(os.path.dirname(processed_path), exist_ok=True)
-            cv2.imwrite(processed_path, output)
+            # Process with Roboflow
+            roboflow_result = roboflow_config.predict_image_from_url(cloudinary_url)
             
-            # Update image upload with processed image
-            image_upload.processed_image = f'processed/{image_id}_processed.jpg'
-        
-        # Save analysis results
-        analysis_results = {
-            'detections': [],
-            'masks': []
-        }
-        
-        if boxes is not None:
-            for box in boxes:
-                detection = {
-                    'class': model.names[int(box.cls)],
-                    'confidence': float(box.conf),
-                    'bbox': box.xyxy[0].tolist()
-                }
-                analysis_results['detections'].append(detection)
-        
-        image_upload.analysis_results = analysis_results
-        image_upload.status = 'completed'
-        image_upload.save()
-        
-        return True
+            # Analyze predictions
+            analysis_results = roboflow_config.analyze_predictions(roboflow_result)
+            
+            return {
+                'image_id': image_id,
+                'cloudinary_url': cloudinary_url,
+                'analysis_results': analysis_results,
+                'status': 'completed',
+                'model_used': 'Roboflow Waste Detection v2'
+            }
+            
+        finally:
+            # Clean up temporary file
+            if os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
         
     except Exception as e:
-        if image_upload:
-            image_upload.status = 'failed'
-            image_upload.save()
-        raise e 
+        print(f"Error processing image with Roboflow: {str(e)}")
+        return {
+            'image_id': image_id,
+            'error': str(e),
+            'status': 'failed'
+        }
+
+@shared_task
+def process_image_with_yolo(image_id: str, image_data: str, location: str = ""):
+    """
+    Process image using local YOLOv8 model (fallback)
+    
+    Args:
+        image_id: Unique identifier for the image
+        image_data: Base64 encoded image data
+        location: Location where image was taken
+    """
+    try:
+        # Decode base64 image data
+        if ',' in image_data:
+            image_data = image_data.split(',')[1]
+        
+        image_bytes = base64.b64decode(image_data)
+        
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
+            temp_file.write(image_bytes)
+            temp_file_path = temp_file.name
+        
+        try:
+            # Upload to Cloudinary
+            cloudinary_result = cloudinary.uploader.upload(
+                temp_file_path,
+                folder="binsavvy/waste_images",
+                public_id=f"waste_{image_id}",
+                overwrite=True
+            )
+            
+            # Load YOLO model - use current directory if BASE_DIR not available
+            try:
+                model_path = os.path.join(settings.BASE_DIR, 'yolov8n-seg.pt')
+            except:
+                # Fallback to current directory
+                model_path = os.path.join(os.getcwd(), 'yolov8n-seg.pt')
+            
+            if not os.path.exists(model_path):
+                # Download model if not exists
+                model = YOLO('yolov8n-seg.pt')
+                model.save(model_path)
+            else:
+                model = YOLO(model_path)
+            
+            # Run inference
+            results = model(temp_file_path)
+            
+            # Process results
+            detections = []
+            for result in results:
+                boxes = result.boxes
+                if boxes is not None:
+                    for box in boxes:
+                        detection = {
+                            'class': model.names[int(box.cls[0])],
+                            'confidence': float(box.conf[0]),
+                            'bbox': box.xyxy[0].tolist()
+                        }
+                        detections.append(detection)
+            
+            # Analyze results
+            total_detections = len(detections)
+            avg_confidence = sum(d['confidence'] for d in detections) / total_detections if total_detections > 0 else 0
+            
+            waste_counts = {}
+            for detection in detections:
+                class_name = detection['class']
+                if class_name not in waste_counts:
+                    waste_counts[class_name] = 0
+                waste_counts[class_name] += 1
+            
+            analysis_results = {
+                'total_detections': total_detections,
+                'average_confidence': round(avg_confidence, 3),
+                'waste_types': waste_counts,
+                'detections': detections,
+                'model_used': 'YOLOv8n Segmentation',
+                'model_accuracy': 'Local Model'
+            }
+            
+            return {
+                'image_id': image_id,
+                'cloudinary_url': cloudinary_result['secure_url'],
+                'analysis_results': analysis_results,
+                'status': 'completed',
+                'model_used': 'YOLOv8n Segmentation'
+            }
+            
+        finally:
+            # Clean up temporary file
+            if os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
+        
+    except Exception as e:
+        print(f"Error processing image with YOLO: {str(e)}")
+        return {
+            'image_id': image_id,
+            'error': str(e),
+            'status': 'failed'
+        }
+
+@shared_task
+def process_image(image_id: str, image_data: str, location: str = "", use_roboflow: bool = True):
+    """
+    Main image processing task - chooses between Roboflow and YOLO
+    
+    Args:
+        image_id: Unique identifier for the image
+        image_data: Base64 encoded image data
+        location: Location where image was taken
+        use_roboflow: Whether to use Roboflow API (True) or local YOLO (False)
+    """
+    try:
+        if use_roboflow:
+            # Try Roboflow first
+            result = process_image_with_roboflow.delay(image_id, image_data, location)
+            return result.get()
+        else:
+            # Use local YOLO model
+            result = process_image_with_yolo.delay(image_id, image_data, location)
+            return result.get()
+            
+    except Exception as e:
+        print(f"Error in main image processing task: {str(e)}")
+        # Fallback to YOLO if Roboflow fails
+        if use_roboflow:
+            print("Roboflow failed, falling back to YOLO...")
+            result = process_image_with_yolo.delay(image_id, image_data, location)
+            return result.get()
+        else:
+            return {
+                'image_id': image_id,
+                'error': str(e),
+                'status': 'failed'
+            } 
