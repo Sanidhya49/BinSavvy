@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { ImageUpload, Location } from "@/types/waste";
+import { apiClient } from "@/lib/api";
 
 const UploadForm = () => {
   const { user } = useAuth();
@@ -18,17 +18,19 @@ const UploadForm = () => {
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [useGps, setUseGps] = useState(false);
-  const [location, setLocation] = useState<Location>({
-    address: "",
-    latitude: null,
-    longitude: null
-  });
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
         toast.error("Please select an image file");
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error("File size must be less than 10MB");
         return;
       }
       
@@ -43,11 +45,8 @@ const UploadForm = () => {
       setUseGps(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLocation({
-            ...location,
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
+          setLatitude(position.coords.latitude);
+          setLongitude(position.coords.longitude);
           toast.success("GPS location captured successfully!");
         },
         () => {
@@ -61,12 +60,7 @@ const UploadForm = () => {
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const addressValue = e.target.value;
-    setAddress(addressValue);
-    setLocation({
-      ...location,
-      address: addressValue
-    });
+    setAddress(e.target.value);
   };
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -77,7 +71,7 @@ const UploadForm = () => {
       return;
     }
     
-    if (!location.address && !useGps) {
+    if (!address.trim() && !useGps) {
       toast.error("Please provide location information");
       return;
     }
@@ -85,43 +79,30 @@ const UploadForm = () => {
     try {
       setLoading(true);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // In a real app, this would upload the image to a server
-      // and get back the URL and thumbnail URL
-      
-      // Create a mock image upload object
-      const newUpload: ImageUpload = {
-        id: `upload-${Date.now()}`,
-        userId: user?.id || "",
-        imageUrl: previewUrl || "",
-        thumbnailUrl: previewUrl || "",
-        location: {
-          address: location.address,
-          latitude: location.latitude,
-          longitude: location.longitude
-        },
-        status: "pending",
-        uploadedAt: new Date().toISOString()
-      };
-      
-      // In a real app, this would be saved to a database
-      
-      // Get the existing uploads or initialize an empty array
-      const existingUploads = JSON.parse(localStorage.getItem('binsavvy-uploads') || '[]');
-      
-      // Add the new upload
-      const updatedUploads = [newUpload, ...existingUploads];
-      
-      // Save back to localStorage
-      localStorage.setItem('binsavvy-uploads', JSON.stringify(updatedUploads));
+      // Use the backend API to upload the image
+      const response = await apiClient.uploadImage(
+        selectedFile,
+        address.trim() || "GPS Location",
+        latitude,
+        longitude
+      );
       
       toast.success("Image uploaded successfully!");
+      
+      // Clear form
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setAddress("");
+      setLatitude(null);
+      setLongitude(null);
+      setUseGps(false);
+      
+      // Navigate to history page
       navigate("/history");
+      
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload image");
+      toast.error(error instanceof Error ? error.message : "Failed to upload image");
     } finally {
       setLoading(false);
     }
@@ -179,9 +160,9 @@ const UploadForm = () => {
                 size="sm"
                 onClick={getGeoLocation}
                 className="text-xs"
-                disabled={useGps && location.latitude !== null}
+                disabled={useGps && latitude !== null}
               >
-                {useGps && location.latitude !== null ? "GPS Location Captured" : "Use GPS"}
+                {useGps && latitude !== null ? "GPS Location Captured" : "Use GPS"}
               </Button>
             </div>
             <Textarea
@@ -192,9 +173,9 @@ const UploadForm = () => {
               rows={3}
               disabled={loading}
             />
-            {useGps && location.latitude !== null && (
+            {useGps && latitude !== null && (
               <div className="text-xs text-muted-foreground">
-                GPS Coordinates: {location.latitude.toFixed(6)}, {location.longitude?.toFixed(6)}
+                GPS Coordinates: {latitude.toFixed(6)}, {longitude?.toFixed(6)}
               </div>
             )}
           </div>
@@ -203,7 +184,7 @@ const UploadForm = () => {
           <Button
             type="submit"
             className="w-full button-gradient"
-            disabled={loading}
+            disabled={loading || !selectedFile}
           >
             {loading ? (
               <>

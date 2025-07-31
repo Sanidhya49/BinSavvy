@@ -18,6 +18,9 @@ import NotFound from "./pages/NotFound";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminUploads from "./pages/admin/AdminUploads";
 import AdminAnalysis from "./pages/admin/AdminAnalysis";
+import TestConnection from "./components/TestConnection";
+import BackendTest from "./components/BackendTest";
+import DebugInfo from "./components/DebugInfo";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +46,11 @@ const App = () => (
             <Route path="/admin/uploads" element={<AdminUploads />} />
             <Route path="/admin/analysis" element={<AdminAnalysis />} />
             <Route path="/admin/analysis/:uploadId" element={<AdminAnalysis />} />
+            
+            {/* Test routes */}
+            <Route path="/test" element={<TestConnection />} />
+            <Route path="/backend-test" element={<BackendTest />} />
+            <Route path="/debug" element={<DebugInfo />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

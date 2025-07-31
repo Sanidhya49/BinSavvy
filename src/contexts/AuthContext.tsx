@@ -1,24 +1,7 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { AuthContextType, User } from "@/types/auth";
-
-// Mock data for demonstration purposes
-const mockUsers: User[] = [
-  {
-    id: "1",
-    email: "admin@binsavvy.com",
-    name: "Admin User",
-    role: "admin",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "2",
-    email: "user@binsavvy.com",
-    name: "Demo User",
-    role: "user",
-    createdAt: new Date().toISOString()
-  }
-];
+import { apiClient } from "@/lib/api";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -45,21 +28,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       setError(null);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // For now, use a simple check since we don't have full Firebase auth yet
+      // In a real app, this would call Firebase Auth or your backend auth endpoint
       
-      // Find user by email (mock authentication)
-      const foundUser = mockUsers.find(u => u.email === email);
-      
-      if (!foundUser) {
-        throw new Error("Invalid email or password");
+      // Check if backend is running
+      try {
+        await apiClient.checkUserServiceHealth();
+      } catch (backendError) {
+        throw new Error("Backend service is not available. Please start the Django server.");
       }
       
-      // In a real app, you'd verify the password here
+      // For demo purposes, allow these test accounts
+      const validEmails = [
+        'admin@binsavvy.com',
+        'user@binsavvy.com',
+        'test@binsavvy.com'
+      ];
+      
+      if (!validEmails.includes(email)) {
+        throw new Error("Invalid email or password. Try: admin@binsavvy.com or user@binsavvy.com");
+      }
+      
+      // Create user object
+      const userData: User = {
+        id: email === 'admin@binsavvy.com' ? 'admin-1' : 'user-1',
+        email,
+        name: email === 'admin@binsavvy.com' ? 'Admin User' : 'Demo User',
+        role: email === 'admin@binsavvy.com' ? 'admin' : 'user',
+        createdAt: new Date().toISOString()
+      };
       
       // Save user to state and localStorage
-      setUser(foundUser);
-      localStorage.setItem('binsavvy-user', JSON.stringify(foundUser));
+      setUser(userData);
+      localStorage.setItem('binsavvy-user', JSON.stringify(userData));
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -72,17 +74,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       setError(null);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Check if email already exists
-      const existingUser = mockUsers.find(u => u.email === email);
-      if (existingUser) {
-        throw new Error("Email already in use");
+      // Check if backend is running
+      try {
+        await apiClient.checkUserServiceHealth();
+      } catch (backendError) {
+        throw new Error("Backend service is not available. Please start the Django server.");
       }
       
-      // Create new user (in a real app, this would be saved to a database)
-      const newUser: User = {
+      // For demo purposes, create a new user
+      const userData: User = {
         id: `user-${Date.now()}`,
         email,
         name,
@@ -91,8 +91,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       };
       
       // Save user to state and localStorage
-      setUser(newUser);
-      localStorage.setItem('binsavvy-user', JSON.stringify(newUser));
+      setUser(userData);
+      localStorage.setItem('binsavvy-user', JSON.stringify(userData));
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {

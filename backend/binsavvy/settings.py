@@ -142,8 +142,15 @@ SIMPLE_JWT = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite dev server
+    "http://localhost:5173",  # Vite dev server (default)
+    "http://localhost:8080",  # Vite dev server (custom port)
+    "http://127.0.0.1:8080",  # Alternative localhost
+    "http://127.0.0.1:5173",  # Alternative localhost
 ]
+
+# Additional CORS settings for development
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True  # Only for development - remove in production
 
 # Firebase settings
 FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID', 'binsavvy')

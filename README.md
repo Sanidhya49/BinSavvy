@@ -5,18 +5,19 @@ A comprehensive web platform for smart waste analysis using AI and machine learn
 ## 🚀 Features
 
 ### For Users:
-- **User Authentication**: Secure registration and login via Firebase
+- **User Authentication**: Secure registration and login system
 - **Image Upload**: Upload photos with location data and GPS coordinates
-- **Upload History**: View and manage all uploaded images
+- **Upload History**: View and manage all uploaded images with real-time status
+- **Dashboard**: View recent activity and upload statistics
 - **Real-time Processing**: Track processing status of uploaded images
-- **Analysis Results**: View AI-generated waste analysis and insights
+- **Analysis Results**: View AI-generated waste analysis and insights (coming soon)
 
 ### For Administrators:
 - **Admin Dashboard**: Comprehensive management interface
-- **ML Model Integration**: Run YOLOv8 models for waste detection
-- **Batch Processing**: Process multiple images simultaneously
-- **Data Analytics**: View waste composition and distribution insights
-- **User Management**: Manage user accounts and permissions
+- **ML Model Integration**: Run YOLOv8 models for waste detection (coming soon)
+- **Batch Processing**: Process multiple images simultaneously (coming soon)
+- **Data Analytics**: View waste composition and distribution insights (coming soon)
+- **User Management**: Manage user accounts and permissions (coming soon)
 
 ## 🛠️ Tech Stack
 
@@ -27,41 +28,44 @@ A comprehensive web platform for smart waste analysis using AI and machine learn
 - **shadcn/ui** for UI components
 - **React Router** for navigation
 - **React Hook Form** for form handling
+- **Sonner** for toast notifications
 
 ### Backend:
 - **Django 5.0** with Django REST Framework
-- **Firebase Authentication** for user management
-- **Firestore Database** for data storage
+- **SQLite** for development database (PostgreSQL for production)
 - **Cloudinary** for image storage and processing
-- **Celery** with Redis for background tasks
-- **YOLOv8** for ML model integration
+- **Celery** with Redis for background tasks (coming soon)
+- **YOLOv8** for ML model integration (coming soon)
 
 ### ML & AI:
-- **Ultralytics YOLOv8** for object detection
-- **OpenCV** for image processing
-- **NumPy** for numerical operations
+- **Ultralytics YOLOv8** for object detection (coming soon)
+- **OpenCV** for image processing (coming soon)
+- **NumPy** for numerical operations (coming soon)
 
 ## 📁 Project Structure
 
 ```
 BinSavvy-BS/
-├── frontend/                 # React frontend
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── contexts/       # React contexts
-│   │   ├── hooks/          # Custom hooks
-│   │   └── lib/            # Utility functions
-│   └── public/             # Static assets
-├── backend/                 # Django backend
-│   ├── binsavvy/           # Django project settings
-│   ├── users/              # User management app
-│   ├── images/             # Image upload app
-│   ├── ml_service/         # ML processing app
-│   ├── firebase_config.py  # Firebase configuration
+├── src/                    # React frontend source
+│   ├── components/         # Reusable UI components
+│   │   ├── ui/            # shadcn/ui components
+│   │   ├── user/          # User-specific components
+│   │   ├── admin/         # Admin components
+│   │   └── auth/          # Authentication components
+│   ├── pages/             # Page components
+│   ├── contexts/          # React contexts
+│   ├── hooks/             # Custom hooks
+│   ├── lib/               # Utility functions
+│   └── types/             # TypeScript type definitions
+├── backend/               # Django backend
+│   ├── binsavvy/          # Django project settings
+│   ├── users/             # User management app
+│   ├── images/            # Image upload app
+│   ├── ml_service/        # ML processing app
 │   ├── cloudinary_config.py # Cloudinary configuration
-│   └── requirements.txt    # Python dependencies
-└── README.md              # This file
+│   └── requirements.txt   # Python dependencies
+├── public/                # Static assets
+└── README.md             # This file
 ```
 
 ## 🚀 Quick Start
@@ -69,8 +73,6 @@ BinSavvy-BS/
 ### Prerequisites
 - Node.js 18+ and npm
 - Python 3.10+
-- Redis server
-- Firebase project
 - Cloudinary account
 
 ### 1. Clone the Repository
@@ -94,19 +96,10 @@ Create a `.env` file in the `backend` directory:
 ```env
 DEBUG=True
 SECRET_KEY=your-secret-key-here
-FIREBASE_PROJECT_ID=binsavvy
-FIREBASE_API_KEY=your-firebase-api-key
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
-CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
 ```
-
-#### Firebase Setup
-1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-2. Enable Authentication, Firestore Database
-3. Download service account key and save as `firebase-service-account.json`
 
 #### Cloudinary Setup
 1. Create account at [Cloudinary](https://cloudinary.com/)
@@ -120,23 +113,17 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-#### Start Backend Services
+#### Start Backend Server
 ```bash
-# Start Redis server (in separate terminal)
-redis-server
-
-# Start Celery worker (in separate terminal)
-celery -A binsavvy worker -l info
-
-# Start Django server
 python manage.py runserver
 ```
+
+The backend will be available at `http://localhost:8000`
 
 ### 3. Frontend Setup
 
 #### Install Dependencies
 ```bash
-cd frontend  # or from project root
 npm install
 ```
 
@@ -145,7 +132,7 @@ npm install
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:5173`
+The frontend will be available at `http://localhost:8080`
 
 ## 📡 API Endpoints
 
@@ -177,21 +164,41 @@ python manage.py runserver
 npm run dev
 ```
 
-### Running Tests
-```bash
-# Backend tests
-python manage.py test
+### Debug Routes
+- `http://localhost:8080/debug` - API debug information
+- `http://localhost:8080/backend-test` - Backend connection test
 
-# Frontend tests
-npm test
-```
+## ✅ Current Status
+
+### ✅ Completed Features:
+- **User Authentication**: Login/Register with demo accounts
+- **Image Upload**: Upload images with location and GPS data
+- **Image Storage**: Base64 storage in backend (Cloudinary integration ready)
+- **Upload History**: View all uploaded images with status
+- **Dashboard**: Real-time stats and recent activity
+- **Backend API**: Full REST API with health checks
+- **Frontend-Backend Integration**: Complete API integration
+- **Responsive UI**: Mobile-friendly interface
+
+### 🚧 In Progress:
+- **ML Model Integration**: YOLOv8 integration for waste detection
+- **Cloudinary Integration**: Real image storage and processing
+- **Admin Dashboard**: Full admin functionality
+- **Real-time Updates**: WebSocket integration
+
+### 📋 Planned Features:
+- **Firebase Authentication**: Full Firebase integration
+- **Database Migration**: PostgreSQL for production
+- **Celery Tasks**: Background processing
+- **Analytics Dashboard**: Waste composition analysis
+- **Drone Footage Analysis**: Video processing capabilities
 
 ## 🚀 Deployment
 
 ### Backend Deployment
 1. Set up PostgreSQL database
 2. Configure environment variables
-3. Set up Celery with Redis
+3. Set up Celery with Redis (when implemented)
 4. Deploy to your preferred platform (Heroku, AWS, etc.)
 
 ### Frontend Deployment
@@ -213,9 +220,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [YOLOv8](https://github.com/ultralytics/ultralytics) for object detection
-- [Firebase](https://firebase.google.com/) for backend services
 - [Cloudinary](https://cloudinary.com/) for image processing
 - [shadcn/ui](https://ui.shadcn.com/) for UI components
+- [Django](https://www.djangoproject.com/) for backend framework
 
 ## 📞 Support
 

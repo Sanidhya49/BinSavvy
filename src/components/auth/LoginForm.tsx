@@ -133,6 +133,17 @@ const LoginForm = ({ onToggleForm }: LoginFormProps) => {
               Create an account
             </button>
           </div>
+          
+          {/* Demo Instructions */}
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <h4 className="font-semibold text-blue-800 mb-2">Demo Instructions:</h4>
+            <ul className="text-xs text-blue-700 space-y-1">
+              <li>• <strong>Backend Required:</strong> Start Django server first</li>
+              <li>• <strong>Quick Login:</strong> Use "Login as Admin" or "Login as User" buttons</li>
+              <li>• <strong>Manual Login:</strong> Try admin@binsavvy.com or user@binsavvy.com</li>
+              <li>• <strong>Any Password:</strong> Password field can be anything for demo</li>
+            </ul>
+          </div>
         </CardFooter>
       </form>
     </Card>
