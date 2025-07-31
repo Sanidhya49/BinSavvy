@@ -25,4 +25,4 @@ class ImageUpload(models.Model):
         ordering = ['-uploaded_at']
 
     def __str__(self):
-        return f"{self.user.email} - {self.uploaded_at}" 
+        return f"{self.user.email} - {self.uploaded_at}"
