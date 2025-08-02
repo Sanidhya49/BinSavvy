@@ -18,12 +18,13 @@ class RoboflowConfig:
         if not self.api_key:
             raise ValueError("ROBOFLOW_API_KEY not found in environment variables")
     
-    def predict_image(self, image_path: str) -> Dict[str, Any]:
+    def predict_image(self, image_path: str, confidence_threshold: float = 0.1) -> Dict[str, Any]:
         """
         Predict waste detection on an image using Roboflow API
         
         Args:
             image_path: Path to the image file
+            confidence_threshold: Minimum confidence threshold (0.0 to 1.0, default 0.1 = 10%)
             
         Returns:
             Dictionary containing prediction results
@@ -39,7 +40,8 @@ class RoboflowConfig:
                 "Content-Type": "application/x-www-form-urlencoded"
             }
             params = {
-                "api_key": self.api_key
+                "api_key": self.api_key,
+                "confidence": confidence_threshold
             }
             
             # Make the API request
@@ -59,12 +61,13 @@ class RoboflowConfig:
             print(f"Error in Roboflow prediction: {str(e)}")
             return {"error": str(e)}
     
-    def predict_image_from_url(self, image_url: str) -> Dict[str, Any]:
+    def predict_image_from_url(self, image_url: str, confidence_threshold: float = 0.1) -> Dict[str, Any]:
         """
         Predict waste detection on an image using URL
         
         Args:
             image_url: URL of the image
+            confidence_threshold: Minimum confidence threshold (0.0 to 1.0, default 0.1 = 10%)
             
         Returns:
             Dictionary containing prediction results
@@ -76,7 +79,8 @@ class RoboflowConfig:
             }
             params = {
                 "api_key": self.api_key,
-                "image": image_url
+                "image": image_url,
+                "confidence": confidence_threshold
             }
             
             response = requests.post(url, headers=headers, params=params)
