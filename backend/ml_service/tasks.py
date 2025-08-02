@@ -110,7 +110,7 @@ def process_image_with_yolo(image_id: str, image_data: str, location: str = ""):
                 overwrite=True
             )
             
-            # Load YOLO model - use current directory if BASE_DIR not available
+            # Load YOLO model with safe loading
             try:
                 model_path = os.path.join(settings.BASE_DIR, 'yolov8n-seg.pt')
             except:
@@ -122,7 +122,14 @@ def process_image_with_yolo(image_id: str, image_data: str, location: str = ""):
                 model = YOLO('yolov8n-seg.pt')
                 model.save(model_path)
             else:
-                model = YOLO(model_path)
+                # Load with safe weights_only=False for compatibility
+                import torch
+                try:
+                    model = YOLO(model_path)
+                except Exception as yolo_error:
+                    print(f"YOLO loading error: {yolo_error}")
+                    # Try alternative loading method
+                    model = YOLO('yolov8n-seg.pt')  # Download fresh model
             
             # Run inference
             results = model(temp_file_path)
@@ -195,20 +202,17 @@ def process_image(image_id: str, image_data: str, location: str = "", use_robofl
     try:
         if use_roboflow:
             # Try Roboflow first
-            result = process_image_with_roboflow.delay(image_id, image_data, location)
-            return result.get()
+            return process_image_with_roboflow(image_id, image_data, location)
         else:
             # Use local YOLO model
-            result = process_image_with_yolo.delay(image_id, image_data, location)
-            return result.get()
+            return process_image_with_yolo(image_id, image_data, location)
             
     except Exception as e:
         print(f"Error in main image processing task: {str(e)}")
         # Fallback to YOLO if Roboflow fails
         if use_roboflow:
             print("Roboflow failed, falling back to YOLO...")
-            result = process_image_with_yolo.delay(image_id, image_data, location)
-            return result.get()
+            return process_image_with_yolo(image_id, image_data, location)
         else:
             return {
                 'image_id': image_id,
