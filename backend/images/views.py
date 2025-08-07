@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 import cloudinary
 import cloudinary.uploader
-from cloudinary_config import cloudinary_config
+from cloudinary_config import upload_image as cloudinary_upload_image, delete_image
 
 # Import ML tasks with error handling
 try:
@@ -57,14 +57,21 @@ def upload_image(request):
         image_id = str(uuid.uuid4())
         current_time = datetime.now().isoformat()
         
-        # Convert image to base64 for ML processing
-        image_data = image_file.read()
-        image_base64 = base64.b64encode(image_data).decode('utf-8')
+        print(f"Starting upload for image {image_id} with location: {location}")
         
-        # Create initial image object
+        # Upload to Cloudinary
+        cloudinary_result = cloudinary_upload_image(image_file, folder="binsavvy/uploads")
+        
+        if not cloudinary_result:
+            return Response({
+                'error': 'Failed to upload image to Cloudinary'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Create initial image object with Cloudinary URL
         image_object = {
             'image_id': image_id,
-            'image_url': f"data:{image_file.content_type};base64,{image_base64}",
+            'image_url': cloudinary_result['url'],
+            'cloudinary_public_id': cloudinary_result['public_id'],
             'location': location,
             'latitude': float(latitude) if latitude else None,
             'longitude': float(longitude) if longitude else None,
@@ -72,13 +79,15 @@ def upload_image(request):
             'status': 'processing',
             'processed_image_url': None,
             'analysis_results': None,
-            'error_message': None
+            'error_message': None,
+            'image_width': cloudinary_result.get('width'),
+            'image_height': cloudinary_result.get('height')
         }
         
         # Store the image temporarily
         uploaded_images.append(image_object)
         
-        print(f"Processing image {image_id} with location: {location}")
+        print(f"Image uploaded to Cloudinary: {cloudinary_result['url']}")
         
         # If skip_ml is True, just store the image without ML processing
         if skip_ml:
@@ -98,18 +107,76 @@ def upload_image(request):
             print(f"Image {image_id} uploaded without ML processing")
             
             return Response({
-                'message': 'Image uploaded successfully (ML processing skipped)',
-                'data': image_object
+                'message': 'Image uploaded successfully',
+                'image_id': image_id,
+                'image_url': cloudinary_result['url'],
+                'status': 'completed',
+                'analysis_results': image_object['analysis_results']
             }, status=status.HTTP_201_CREATED)
         
-        # Check if ML is available
-        if not ML_AVAILABLE:
-            print(f"ML not available, storing image without processing")
-            image_object['status'] = 'completed'
+        # Process with ML if available
+        if ML_AVAILABLE:
+            try:
+                print(f"Starting ML processing for image {image_id}")
+                
+                # Process image with ML
+                ml_result = process_image(
+                    image_id=image_id,
+                    image_url=cloudinary_result['url'],
+                    location=location,
+                    use_roboflow=use_roboflow
+                )
+                
+                # Update image object with ML results
+                image_object['status'] = 'completed'
+                image_object['processed_image_url'] = ml_result.get('processed_image_url')
+                image_object['analysis_results'] = ml_result.get('analysis_results')
+                
+                # Update stored image
+                for i, img in enumerate(uploaded_images):
+                    if img['image_id'] == image_id:
+                        uploaded_images[i] = image_object
+                        break
+                
+                print(f"ML processing completed for image {image_id}")
+                
+                return Response({
+                    'message': 'Image uploaded and processed successfully',
+                    'image_id': image_id,
+                    'image_url': cloudinary_result['url'],
+                    'status': 'completed',
+                    'processed_image_url': ml_result.get('processed_image_url'),
+                    'analysis_results': ml_result.get('analysis_results')
+                }, status=status.HTTP_201_CREATED)
+                
+            except Exception as ml_error:
+                print(f"ML processing failed for image {image_id}: {str(ml_error)}")
+                traceback.print_exc()
+                
+                # Update image object with error
+                image_object['status'] = 'ml_failed'
+                image_object['error_message'] = f"ML processing failed: {str(ml_error)}"
+                
+                # Update stored image
+                for i, img in enumerate(uploaded_images):
+                    if img['image_id'] == image_id:
+                        uploaded_images[i] = image_object
+                        break
+                
+                return Response({
+                    'message': 'Image uploaded but ML processing failed',
+                    'image_id': image_id,
+                    'image_url': cloudinary_result['url'],
+                    'status': 'ml_failed',
+                    'error_message': str(ml_error)
+                }, status=status.HTTP_201_CREATED)
+        else:
+            # ML not available
+            image_object['status'] = 'ml_unavailable'
             image_object['analysis_results'] = {
-                'message': 'ML processing not available (Redis/Celery not running)',
+                'message': 'ML processing not available',
                 'total_detections': 0,
-                'model_used': 'No ML processing'
+                'model_used': 'No ML available'
             }
             
             # Update stored image
@@ -118,88 +185,22 @@ def upload_image(request):
                     uploaded_images[i] = image_object
                     break
             
-            return Response({
-                'message': 'Image uploaded successfully (ML processing not available)',
-                'data': image_object
-            }, status=status.HTTP_201_CREATED)
-        
-        # Start ML processing task
-        try:
-            # Process image with ML
-            ml_result = process_image.delay(
-                image_id=image_id,
-                image_data=image_base64,
-                location=location,
-                use_roboflow=use_roboflow
-            )
-            
-            # Get result (in production, this would be async)
-            result = ml_result.get(timeout=120)  # Increased timeout to 120 seconds
-            
-            print(f"ML processing result: {result}")
-            
-            if result and result.get('status') == 'completed':
-                # Update image object with results
-                image_object.update({
-                    'status': 'completed',
-                    'processed_image_url': result.get('cloudinary_url'),
-                    'analysis_results': result.get('analysis_results'),
-                    'model_used': result.get('model_used')
-                })
-                
-                # Update stored image
-                for i, img in enumerate(uploaded_images):
-                    if img['image_id'] == image_id:
-                        uploaded_images[i] = image_object
-                        break
-                
-                print(f"Image {image_id} processed successfully")
-                
-                return Response({
-                    'message': 'Image uploaded and processed successfully',
-                    'data': image_object
-                }, status=status.HTTP_201_CREATED)
-            else:
-                # ML processing failed, but image was uploaded
-                error_msg = result.get('error', 'Processing failed') if result else 'Processing timeout'
-                image_object['status'] = 'completed'  # Changed from 'failed' to 'completed'
-                image_object['analysis_results'] = {
-                    'message': f'ML processing failed: {error_msg}',
-                    'total_detections': 0,
-                    'model_used': 'No ML processing'
-                }
-                image_object['error_message'] = error_msg
-                
-                print(f"ML processing failed for image {image_id}: {error_msg}")
-                
-                return Response({
-                    'message': 'Image uploaded successfully (ML processing failed)',
-                    'data': image_object
-                }, status=status.HTTP_201_CREATED)
-                
-        except Exception as ml_error:
-            # ML processing failed, but image was uploaded
-            error_msg = str(ml_error)
-            image_object['status'] = 'completed'  # Changed from 'failed' to 'completed'
-            image_object['analysis_results'] = {
-                'message': f'ML processing failed: {error_msg}',
-                'total_detections': 0,
-                'model_used': 'No ML processing'
-            }
-            image_object['error_message'] = error_msg
-            
-            print(f"ML processing exception for image {image_id}: {error_msg}")
-            print(f"Traceback: {traceback.format_exc()}")
+            print(f"Image {image_id} uploaded but ML not available")
             
             return Response({
-                'message': 'Image uploaded successfully (ML processing failed)',
-                'data': image_object
+                'message': 'Image uploaded but ML processing not available',
+                'image_id': image_id,
+                'image_url': cloudinary_result['url'],
+                'status': 'ml_unavailable',
+                'analysis_results': image_object['analysis_results']
             }, status=status.HTTP_201_CREATED)
-    
+            
     except Exception as e:
-        print(f"Upload error: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        print(f"Error in upload_image: {str(e)}")
+        traceback.print_exc()
+        return Response({
+            'error': f'Upload failed: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -237,11 +238,28 @@ def get_image_details(request, image_id):
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
 def delete_image(request, image_id):
-    """Delete image from storage"""
+    """Delete image from storage and Cloudinary"""
     try:
         global uploaded_images
         
-        # Find and remove the image
+        # Find the image before deleting
+        image_to_delete = next((img for img in uploaded_images if img['image_id'] == image_id), None)
+        
+        if not image_to_delete:
+            return Response({'error': 'Image not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Delete from Cloudinary if public_id exists
+        if image_to_delete.get('cloudinary_public_id'):
+            try:
+                delete_success = delete_image(image_to_delete['cloudinary_public_id'])
+                if delete_success:
+                    print(f"Image {image_id} deleted from Cloudinary successfully")
+                else:
+                    print(f"Failed to delete image {image_id} from Cloudinary")
+            except Exception as cloudinary_error:
+                print(f"Error deleting from Cloudinary: {cloudinary_error}")
+        
+        # Remove from local storage
         uploaded_images = [img for img in uploaded_images if img['image_id'] != image_id]
         
         return Response({
@@ -265,8 +283,7 @@ def reprocess_image(request, image_id):
         # Get parameters
         use_roboflow = request.data.get('use_roboflow', True)
         
-        # Extract base64 data from image URL
-        image_data = image['image_url'].split(',')[1] if ',' in image['image_url'] else image['image_url']
+        print(f"Reprocessing image {image_id} with use_roboflow={use_roboflow}")
         
         # Update status to processing
         for i, img in enumerate(uploaded_images):
@@ -274,37 +291,94 @@ def reprocess_image(request, image_id):
                 uploaded_images[i]['status'] = 'processing'
                 break
         
-        # Reprocess with ML
-        ml_result = process_image.delay(
-            image_id=image_id,
-            image_data=image_data,
-            location=image['location'],
-            use_roboflow=use_roboflow
-        )
-        
-        result = ml_result.get(timeout=60)
-        
-        if result and result.get('status') == 'completed':
-            # Update with new results
+        # Process with ML if available
+        if ML_AVAILABLE:
+            try:
+                print(f"Starting ML reprocessing for image {image_id}")
+                
+                # Process image with ML using Cloudinary URL
+                ml_result = process_image(
+                    image_id=image_id,
+                    image_url=image['image_url'],
+                    location=image['location'],
+                    use_roboflow=use_roboflow
+                )
+                
+                if ml_result and ml_result.get('status') == 'completed':
+                    # Update with new results
+                    for i, img in enumerate(uploaded_images):
+                        if img['image_id'] == image_id:
+                            uploaded_images[i].update({
+                                'status': 'completed',
+                                'processed_image_url': ml_result.get('processed_image_url'),
+                                'analysis_results': ml_result.get('analysis_results'),
+                                'model_used': ml_result.get('model_used')
+                            })
+                            break
+                    
+                    print(f"ML reprocessing completed for image {image_id}")
+                    
+                    return Response({
+                        'message': 'Image reprocessed successfully',
+                        'success': True,
+                        'data': uploaded_images[i]
+                    })
+                else:
+                    # ML processing failed
+                    error_msg = ml_result.get('error', 'Unknown error') if ml_result else 'Processing failed'
+                    
+                    # Update status to failed
+                    for i, img in enumerate(uploaded_images):
+                        if img['image_id'] == image_id:
+                            uploaded_images[i]['status'] = 'ml_failed'
+                            uploaded_images[i]['error_message'] = error_msg
+                            break
+                    
+                    return Response({
+                        'message': 'Reprocessing failed',
+                        'success': False,
+                        'error': error_msg
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
+            except Exception as ml_error:
+                print(f"ML reprocessing failed for image {image_id}: {str(ml_error)}")
+                traceback.print_exc()
+                
+                # Update status to failed
+                for i, img in enumerate(uploaded_images):
+                    if img['image_id'] == image_id:
+                        uploaded_images[i]['status'] = 'ml_failed'
+                        uploaded_images[i]['error_message'] = f"ML processing failed: {str(ml_error)}"
+                        break
+                
+                return Response({
+                    'message': 'Reprocessing failed',
+                    'success': False,
+                    'error': str(ml_error)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            # ML not available
             for i, img in enumerate(uploaded_images):
                 if img['image_id'] == image_id:
-                    uploaded_images[i].update({
-                        'status': 'completed',
-                        'processed_image_url': result.get('cloudinary_url'),
-                        'analysis_results': result.get('analysis_results'),
-                        'model_used': result.get('model_used')
-                    })
+                    uploaded_images[i]['status'] = 'ml_unavailable'
+                    uploaded_images[i]['analysis_results'] = {
+                        'message': 'ML processing not available',
+                        'total_detections': 0,
+                        'model_used': 'No ML available'
+                    }
                     break
             
             return Response({
-                'message': 'Image reprocessed successfully',
-                'data': uploaded_images[i]
-            })
-        else:
-            return Response({
-                'error': 'Reprocessing failed',
-                'details': result.get('error', 'Unknown error')
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                'message': 'ML processing not available',
+                'success': False,
+                'error': 'ML service not available'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        print(f"Error in reprocess_image: {str(e)}")
+        traceback.print_exc()
+        return Response({
+            'message': 'Reprocessing failed',
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

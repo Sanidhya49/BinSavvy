@@ -7,63 +7,95 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { formatDistanceToNow, format } from "date-fns";
 import { Link } from "react-router-dom";
+import { apiClient } from "@/lib/api";
 
 const UploadsManagement = () => {
   const [uploads, setUploads] = useState<ImageUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUpload, setSelectedUpload] = useState<ImageUpload | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending" | "processed" | "analyzing">("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "processing" | "completed" | "ml_failed" | "ml_unavailable">("all");
+  const [processingUpload, setProcessingUpload] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real app, this would fetch from an API
-    const fetchUploads = () => {
-      setLoading(true);
-      try {
-        // Get uploads from localStorage
-        const allUploads: ImageUpload[] = JSON.parse(localStorage.getItem('binsavvy-uploads') || '[]');
-        setUploads(allUploads);
-      } catch (error) {
-        console.error("Error fetching uploads:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchUploads();
   }, []);
 
-  const handleStartAnalysis = (upload: ImageUpload) => {
-    // Update the upload status to "analyzing"
-    const updatedUpload = { ...upload, status: "analyzing" as const };
-    
-    // Update in state and localStorage
-    const updatedUploads = uploads.map(u => 
-      u.id === upload.id ? updatedUpload : u
-    );
-    
-    setUploads(updatedUploads);
-    localStorage.setItem('binsavvy-uploads', JSON.stringify(updatedUploads));
-    setSelectedUpload(updatedUpload);
-    
-    toast.success("Analysis process started");
+  const fetchUploads = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.getUserImages();
+      const allUploads = response.data || [];
+      setUploads(allUploads);
+      
+      // Auto-select first upload if none selected
+      if (!selectedUpload && allUploads.length > 0) {
+        setSelectedUpload(allUploads[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching uploads:", error);
+      toast.error("Failed to load uploads");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStartAnalysis = async (upload: ImageUpload) => {
+    try {
+      setProcessingUpload(upload.image_id);
+      
+      // Call the reprocess endpoint
+      const response = await apiClient.reprocessImage(upload.image_id, {
+        use_roboflow: true
+      });
+      
+      if (response.success) {
+        toast.success("Analysis started successfully");
+        // Refresh the uploads list
+        await fetchUploads();
+      } else {
+        toast.error("Failed to start analysis");
+      }
+    } catch (error) {
+      console.error("Error starting analysis:", error);
+      toast.error("Failed to start analysis");
+    } finally {
+      setProcessingUpload(null);
+    }
+  };
+
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case "processing":
+        return "Processing";
+      case "completed":
+        return "Completed";
+      case "ml_failed":
+        return "ML Failed";
+      case "ml_unavailable":
+        return "ML Unavailable";
+      default:
+        return "Pending";
+    }
+  };
+
+  const StatusBadge = ({ status }: { status: string }) => {
+    switch (status) {
+      case "processing":
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">Processing</Badge>;
+      case "completed":
+        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Completed</Badge>;
+      case "ml_failed":
+        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">ML Failed</Badge>;
+      case "ml_unavailable":
+        return <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">ML Unavailable</Badge>;
+      default:
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>;
+    }
   };
 
   const filteredUploads = filter === "all" 
     ? uploads 
     : uploads.filter(upload => upload.status === filter);
-
-  const StatusBadge = ({ status }: { status: string }) => {
-    switch (status) {
-      case "pending":
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>;
-      case "analyzing":
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">Analyzing</Badge>;
-      case "processed":
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Processed</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -83,16 +115,16 @@ const UploadsManagement = () => {
             Pending
           </Button>
           <Button 
-            variant={filter === "analyzing" ? "default" : "outline"}
-            onClick={() => setFilter("analyzing")}
+            variant={filter === "processing" ? "default" : "outline"}
+            onClick={() => setFilter("processing")}
           >
-            Analyzing
+            Processing
           </Button>
           <Button 
-            variant={filter === "processed" ? "default" : "outline"}
-            onClick={() => setFilter("processed")}
+            variant={filter === "completed" ? "default" : "outline"}
+            onClick={() => setFilter("completed")}
           >
-            Processed
+            Completed
           </Button>
         </div>
       </div>
@@ -114,17 +146,20 @@ const UploadsManagement = () => {
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {filteredUploads.map((upload) => (
                 <Card 
-                  key={upload.id} 
+                  key={upload.image_id} 
                   className={`overflow-hidden cursor-pointer transition-all border-2 ${
-                    selectedUpload?.id === upload.id ? "border-primary" : "border-border"
+                    selectedUpload?.image_id === upload.image_id ? "border-primary" : "border-border"
                   }`}
                   onClick={() => setSelectedUpload(upload)}
                 >
                   <div className="aspect-square relative">
                     <img
-                      src={upload.thumbnailUrl}
+                      src={upload.image_url}
                       alt="Uploaded waste"
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
                     />
                     <div className="absolute top-2 right-2">
                       <StatusBadge status={upload.status} />
@@ -133,10 +168,10 @@ const UploadsManagement = () => {
                   <CardContent className="p-3">
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground">
-                        Uploaded {formatDistanceToNow(new Date(upload.uploadedAt), { addSuffix: true })}
+                        Uploaded {formatDistanceToNow(new Date(upload.uploaded_at), { addSuffix: true })}
                       </p>
                       <p className="text-sm truncate">
-                        {upload.location.address || "No location data"}
+                        {upload.location || "No location data"}
                       </p>
                     </div>
                   </CardContent>
@@ -155,9 +190,12 @@ const UploadsManagement = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <img
-                  src={selectedUpload.imageUrl}
+                  src={selectedUpload.image_url}
                   alt="Selected waste"
                   className="w-full aspect-video object-cover rounded-md"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder.svg';
+                  }}
                 />
                 
                 <div className="space-y-3">
@@ -171,12 +209,12 @@ const UploadsManagement = () => {
                   <div>
                     <h4 className="text-sm font-medium">Location</h4>
                     <p className="text-sm text-muted-foreground">
-                      {selectedUpload.location.address || "No address provided"}
+                      {selectedUpload.location || "No address provided"}
                     </p>
-                    {(selectedUpload.location.latitude && selectedUpload.location.longitude) && (
+                    {(selectedUpload.latitude && selectedUpload.longitude) && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Coordinates: {selectedUpload.location.latitude.toFixed(6)}, 
-                        {selectedUpload.location.longitude.toFixed(6)}
+                        Coordinates: {selectedUpload.latitude.toFixed(6)}, 
+                        {selectedUpload.longitude.toFixed(6)}
                       </p>
                     )}
                   </div>
@@ -184,46 +222,59 @@ const UploadsManagement = () => {
                   <div>
                     <h4 className="text-sm font-medium">Upload Date</h4>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(selectedUpload.uploadedAt), "PPpp")}
+                      {format(new Date(selectedUpload.uploaded_at), "PPpp")}
                     </p>
                   </div>
                   
-                  {selectedUpload.analysisResults ? (
+                  {selectedUpload.analysis_results ? (
                     <div>
                       <h4 className="text-sm font-medium">Analysis Results</h4>
                       <p className="text-sm text-muted-foreground">
-                        Model: {selectedUpload.analysisResults.model}
+                        Model: {selectedUpload.analysis_results.model_used || "Unknown"}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Items detected: {selectedUpload.analysisResults.detectedItems.length}
+                        Detections: {selectedUpload.analysis_results.total_detections || 0}
                       </p>
-                      <Link to={`/admin/analysis/${selectedUpload.id}`}>
+                      {selectedUpload.processed_image_url && (
+                        <div className="mt-2">
+                          <h5 className="text-xs font-medium">Processed Image</h5>
+                          <img 
+                            src={selectedUpload.processed_image_url} 
+                            alt="Processed waste"
+                            className="w-full mt-1 rounded border"
+                          />
+                        </div>
+                      )}
+                      <Link to={`/admin/analysis/${selectedUpload.image_id}`}>
                         <Button variant="outline" className="mt-2 text-xs" size="sm">
-                          View Analysis Results
+                          View Full Analysis
                         </Button>
                       </Link>
                     </div>
                   ) : (
                     <div className="pt-2">
-                      {selectedUpload.status === "pending" && (
+                      {(selectedUpload.status === "pending" || selectedUpload.status === "ml_failed" || selectedUpload.status === "ml_unavailable") && (
                         <Button 
                           onClick={() => handleStartAnalysis(selectedUpload)}
+                          disabled={processingUpload === selectedUpload.image_id}
                           className="w-full button-gradient"
                         >
-                          Start Analysis
+                          {processingUpload === selectedUpload.image_id ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Processing...
+                            </>
+                          ) : (
+                            "Start Analysis"
+                          )}
                         </Button>
                       )}
                       
-                      {selectedUpload.status === "analyzing" && (
-                        <Button 
-                          variant="outline"
-                          className="w-full" 
-                          asChild
-                        >
-                          <Link to={`/admin/analysis/${selectedUpload.id}`}>
-                            Continue Analysis
-                          </Link>
-                        </Button>
+                      {selectedUpload.status === "processing" && (
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+                          <p className="text-sm text-muted-foreground">Processing with ML...</p>
+                        </div>
                       )}
                     </div>
                   )}

@@ -10,14 +10,14 @@ A comprehensive web platform for smart waste analysis using AI and machine learn
 - **Upload History**: View and manage all uploaded images with real-time status
 - **Dashboard**: View recent activity and upload statistics
 - **Real-time Processing**: Track processing status of uploaded images
-- **Analysis Results**: View AI-generated waste analysis and insights (coming soon)
+- **Analysis Results**: View AI-generated waste analysis and insights
 
 ### For Administrators:
-- **Admin Dashboard**: Comprehensive management interface
-- **ML Model Integration**: Run YOLOv8 models for waste detection (coming soon)
-- **Batch Processing**: Process multiple images simultaneously (coming soon)
-- **Data Analytics**: View waste composition and distribution insights (coming soon)
-- **User Management**: Manage user accounts and permissions (coming soon)
+- **Admin Dashboard**: Comprehensive management interface with system health monitoring
+- **ML Model Integration**: Run YOLOv8 and Roboflow models for waste detection
+- **Analytics Dashboard**: View waste composition and distribution insights
+- **ML Configuration**: Configure models, thresholds, and processing settings
+- **System Monitoring**: Real-time health checks for all services
 
 ## 🛠️ Tech Stack
 
@@ -34,13 +34,19 @@ A comprehensive web platform for smart waste analysis using AI and machine learn
 - **Django 5.0** with Django REST Framework
 - **SQLite** for development database (PostgreSQL for production)
 - **Cloudinary** for image storage and processing
-- **Celery** with Redis for background tasks (coming soon)
-- **YOLOv8** for ML model integration (coming soon)
+- **Celery** with Redis for background tasks (synchronous for development)
+- **YOLOv8** for ML model integration
 
 ### ML & AI:
-- **Ultralytics YOLOv8** for object detection (coming soon)
-- **OpenCV** for image processing (coming soon)
-- **NumPy** for numerical operations (coming soon)
+- **Roboflow API** for cloud-based waste detection
+- **Ultralytics YOLOv8** for local object detection
+- **OpenCV** for image processing
+- **NumPy** for numerical operations
+
+### Cloud Services:
+- **Cloudinary** for image storage and optimization
+- **Roboflow** for ML model hosting
+- **Firebase** for authentication (configured, not fully integrated)
 
 ## 📁 Project Structure
 
@@ -51,6 +57,7 @@ BinSavvy-BS/
 │   │   ├── ui/            # shadcn/ui components
 │   │   ├── user/          # User-specific components
 │   │   ├── admin/         # Admin components
+│   │   ├── government/    # Government dashboard
 │   │   └── auth/          # Authentication components
 │   ├── pages/             # Page components
 │   ├── contexts/          # React contexts
@@ -63,6 +70,7 @@ BinSavvy-BS/
 │   ├── images/            # Image upload app
 │   ├── ml_service/        # ML processing app
 │   ├── cloudinary_config.py # Cloudinary configuration
+│   ├── roboflow_config.py # Roboflow configuration
 │   └── requirements.txt   # Python dependencies
 ├── public/                # Static assets
 └── README.md             # This file
@@ -74,6 +82,7 @@ BinSavvy-BS/
 - Node.js 18+ and npm
 - Python 3.10+
 - Cloudinary account
+- Roboflow API key
 
 ### 1. Clone the Repository
 ```bash
@@ -99,12 +108,18 @@ SECRET_KEY=your-secret-key-here
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
+ROBOFLOW_API_KEY=your-roboflow-api-key
 ```
 
 #### Cloudinary Setup
 1. Create account at [Cloudinary](https://cloudinary.com/)
 2. Get your Cloud Name, API Key, and API Secret
 3. Update the `.env` file with your credentials
+
+#### Roboflow Setup
+1. Create account at [Roboflow](https://roboflow.com/)
+2. Get your API key
+3. Update the `.env` file with your API key
 
 #### Database Setup
 ```bash
@@ -167,31 +182,37 @@ npm run dev
 ### Debug Routes
 - `http://localhost:8080/debug` - API debug information
 - `http://localhost:8080/backend-test` - Backend connection test
+- `http://localhost:8080/government` - Government dashboard
 
 ## ✅ Current Status
 
 ### ✅ Completed Features:
 - **User Authentication**: Login/Register with demo accounts
 - **Image Upload**: Upload images with location and GPS data
-- **Image Storage**: Base64 storage in backend (Cloudinary integration ready)
+- **Real Image Storage**: Cloudinary integration for production-ready storage
 - **Upload History**: View all uploaded images with status
 - **Dashboard**: Real-time stats and recent activity
 - **Backend API**: Full REST API with health checks
 - **Frontend-Backend Integration**: Complete API integration
 - **Responsive UI**: Mobile-friendly interface
+- **ML Integration**: Roboflow API with 10% confidence threshold
+- **Enhanced Admin Dashboard**: System health monitoring and management
+- **Analytics Dashboard**: Waste insights and trends analysis
+- **ML Configuration Panel**: Model settings and thresholds
+- **Government Dashboard**: Waste report viewing system
 
 ### 🚧 In Progress:
-- **ML Model Integration**: YOLOv8 integration for waste detection
-- **Cloudinary Integration**: Real image storage and processing
-- **Admin Dashboard**: Full admin functionality
-- **Real-time Updates**: WebSocket integration
+- **Real-time Updates**: WebSocket integration for live status updates
+- **Advanced Analytics**: Charts and visualizations
+- **Batch Processing**: Process multiple images simultaneously
 
 ### 📋 Planned Features:
 - **Firebase Authentication**: Full Firebase integration
 - **Database Migration**: PostgreSQL for production
-- **Celery Tasks**: Background processing
-- **Analytics Dashboard**: Waste composition analysis
+- **Celery Tasks**: Background processing with Redis
+- **Real-time Notifications**: Push notifications for processing status
 - **Drone Footage Analysis**: Video processing capabilities
+- **Mobile App**: React Native mobile application
 
 ## 🚀 Deployment
 
@@ -221,6 +242,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [YOLOv8](https://github.com/ultralytics/ultralytics) for object detection
 - [Cloudinary](https://cloudinary.com/) for image processing
+- [Roboflow](https://roboflow.com/) for ML model hosting
 - [shadcn/ui](https://ui.shadcn.com/) for UI components
 - [Django](https://www.djangoproject.com/) for backend framework
 
