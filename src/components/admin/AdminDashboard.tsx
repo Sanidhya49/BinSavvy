@@ -283,6 +283,21 @@ const AdminDashboard = () => {
           </div>
           
           <div className="border rounded-md p-4 flex flex-col items-center justify-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="space-y-1 text-center">
+              <h3 className="font-medium">View Analytics</h3>
+              <p className="text-xs text-muted-foreground">
+                Insights and reporting data
+              </p>
+            </div>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/admin/analytics">View Analytics</Link>
+            </Button>
+          </div>
+          
+          <div className="border rounded-md p-4 flex flex-col items-center justify-center space-y-3">
             <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
               <Settings className="h-6 w-6 text-purple-600" />
             </div>

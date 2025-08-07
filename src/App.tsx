@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminUploads from "./pages/admin/AdminUploads";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import TestConnection from "./components/TestConnection";
 import BackendTest from "./components/BackendTest";
 import DebugInfo from "./components/DebugInfo";
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/admin/uploads" element={<AdminUploads />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
             
             {/* Test routes */}
             <Route path="/test" element={<TestConnection />} />
