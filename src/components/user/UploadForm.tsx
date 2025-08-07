@@ -84,7 +84,8 @@ const UploadForm = () => {
         selectedFile,
         address.trim() || "GPS Location",
         latitude,
-        longitude
+        longitude,
+        true // Skip automatic ML processing - let admin trigger it manually
       );
       
       toast.success("Image uploaded successfully!");
@@ -99,10 +100,9 @@ const UploadForm = () => {
       
       // Navigate to history page
       navigate("/history");
-      
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to upload image");
+      toast.error("Failed to upload image. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,8 @@ const UploadForm = () => {
       <CardHeader>
         <CardTitle>Upload Waste Image</CardTitle>
         <CardDescription>
-          Upload photos of waste in your surroundings to help us analyze and address waste management issues.
+          Upload photos of waste in your surroundings to help us analyze and address waste management issues. 
+          Your uploads will be reviewed and processed by our administrators.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleUpload}>

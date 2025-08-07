@@ -253,7 +253,10 @@ const UploadsManagement = () => {
                     </div>
                   ) : (
                     <div className="pt-2">
-                      {(selectedUpload.status === "pending" || selectedUpload.status === "ml_failed" || selectedUpload.status === "ml_unavailable") && (
+                      {(selectedUpload.status === "pending" || 
+                        selectedUpload.status === "ml_failed" || 
+                        selectedUpload.status === "ml_unavailable" ||
+                        selectedUpload.status === "completed") && (
                         <Button 
                           onClick={() => handleStartAnalysis(selectedUpload)}
                           disabled={processingUpload === selectedUpload.image_id}
@@ -265,7 +268,7 @@ const UploadsManagement = () => {
                               Processing...
                             </>
                           ) : (
-                            "Start Analysis"
+                            selectedUpload.status === "completed" ? "Reprocess Analysis" : "Start Analysis"
                           )}
                         </Button>
                       )}
