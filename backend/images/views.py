@@ -282,8 +282,11 @@ def reprocess_image(request, image_id):
         
         # Get parameters
         use_roboflow = request.data.get('use_roboflow', True)
+        confidence_threshold = request.data.get('confidence_threshold', 0.1)
+        min_detection_size = request.data.get('min_detection_size', 20)
+        max_detections = request.data.get('max_detections', 50)
         
-        print(f"Reprocessing image {image_id} with use_roboflow={use_roboflow}")
+        print(f"Reprocessing image {image_id} with use_roboflow={use_roboflow}, confidence={confidence_threshold}")
         
         # Update status to processing
         for i, img in enumerate(uploaded_images):
@@ -296,12 +299,15 @@ def reprocess_image(request, image_id):
             try:
                 print(f"Starting ML reprocessing for image {image_id}")
                 
-                # Process image with ML using Cloudinary URL
+                # Process image with ML using Cloudinary URL and ML parameters
                 ml_result = process_image(
                     image_id=image_id,
                     image_url=image['image_url'],
                     location=image['location'],
-                    use_roboflow=use_roboflow
+                    use_roboflow=use_roboflow,
+                    confidence_threshold=confidence_threshold,
+                    min_detection_size=min_detection_size,
+                    max_detections=max_detections
                 )
                 
                 if ml_result and ml_result.get('status') == 'completed':
@@ -312,7 +318,13 @@ def reprocess_image(request, image_id):
                                 'status': 'completed',
                                 'processed_image_url': ml_result.get('processed_image_url'),
                                 'analysis_results': ml_result.get('analysis_results'),
-                                'model_used': ml_result.get('model_used')
+                                'model_used': ml_result.get('model_used'),
+                                'ml_config': {
+                                    'confidence_threshold': confidence_threshold,
+                                    'min_detection_size': min_detection_size,
+                                    'max_detections': max_detections,
+                                    'model': 'roboflow' if use_roboflow else 'yolo'
+                                }
                             })
                             break
                     

@@ -41,6 +41,9 @@ const Navbar = () => {
               <Link to="/admin/analytics" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
                 Analytics
               </Link>
+              <Link to="/admin/ml-processor" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                ML Processor
+              </Link>
             </>
           ) : (
             <>

@@ -18,7 +18,8 @@ import {
   Database,
   Cpu,
   Wifi,
-  Server
+  Server,
+  Zap
 } from "lucide-react";
 
 interface SystemHealth {
@@ -309,6 +310,21 @@ const AdminDashboard = () => {
             </div>
             <Button asChild variant="outline" className="w-full">
               <Link to="/admin/settings">Configure</Link>
+            </Button>
+          </div>
+          
+          <div className="border rounded-md p-4 flex flex-col items-center justify-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+              <Zap className="h-6 w-6 text-orange-600" />
+            </div>
+            <div className="space-y-1 text-center">
+              <h3 className="font-medium">ML Processor</h3>
+              <p className="text-xs text-muted-foreground">
+                Batch processing and optimization
+              </p>
+            </div>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/admin/ml-processor">Start Processing</Link>
             </Button>
           </div>
         </CardContent>

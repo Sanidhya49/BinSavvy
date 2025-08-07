@@ -19,9 +19,11 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminUploads from "./pages/admin/AdminUploads";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminMLProcessor from "./pages/admin/AdminMLProcessor";
 import TestConnection from "./components/TestConnection";
 import BackendTest from "./components/BackendTest";
 import DebugInfo from "./components/DebugInfo";
+import TestPage from "./components/TestPage";
 import GovernmentDashboard from "./pages/government/GovernmentDashboard";
 
 const queryClient = new QueryClient();
@@ -48,11 +50,13 @@ const App = () => (
             <Route path="/admin/uploads" element={<AdminUploads />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/ml-processor" element={<AdminMLProcessor />} />
             
             {/* Test routes */}
             <Route path="/test" element={<TestConnection />} />
             <Route path="/backend-test" element={<BackendTest />} />
             <Route path="/debug" element={<DebugInfo />} />
+            <Route path="/test-page" element={<TestPage />} />
             
             {/* Government routes */}
             <Route path="/government" element={<GovernmentDashboard />} />

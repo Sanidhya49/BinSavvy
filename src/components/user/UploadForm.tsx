@@ -85,7 +85,7 @@ const UploadForm = () => {
         address.trim() || "GPS Location",
         latitude,
         longitude,
-        true // Skip automatic ML processing - let admin trigger it manually
+        false // Enable automatic ML processing
       );
       
       toast.success("Image uploaded successfully!");
@@ -114,7 +114,7 @@ const UploadForm = () => {
         <CardTitle>Upload Waste Image</CardTitle>
         <CardDescription>
           Upload photos of waste in your surroundings to help us analyze and address waste management issues. 
-          Your uploads will be reviewed and processed by our administrators.
+          Your uploads will be automatically processed using our ML models.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleUpload}>
