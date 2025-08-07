@@ -38,9 +38,6 @@ const Navbar = () => {
               <Link to="/admin/uploads" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
                 User Uploads
               </Link>
-              <Link to="/admin/analysis" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-                Analysis
-              </Link>
             </>
           ) : (
             <>
@@ -140,13 +137,6 @@ const Navbar = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   User Uploads
-                </Link>
-                <Link 
-                  to="/admin/analysis" 
-                  className="text-sm font-medium py-2 px-1 rounded-md hover:bg-accent"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Analysis
                 </Link>
               </>
             ) : (

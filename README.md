@@ -15,7 +15,6 @@ A comprehensive web platform for smart waste analysis using AI and machine learn
 ### For Administrators:
 - **Admin Dashboard**: Comprehensive management interface with system health monitoring
 - **ML Model Integration**: Run YOLOv8 and Roboflow models for waste detection
-- **Analytics Dashboard**: View waste composition and distribution insights
 - **ML Configuration**: Configure models, thresholds, and processing settings
 - **System Monitoring**: Real-time health checks for all services
 
@@ -197,7 +196,6 @@ npm run dev
 - **Responsive UI**: Mobile-friendly interface
 - **ML Integration**: Roboflow API with 10% confidence threshold
 - **Enhanced Admin Dashboard**: System health monitoring and management
-- **Analytics Dashboard**: Waste insights and trends analysis
 - **ML Configuration Panel**: Model settings and thresholds
 - **Government Dashboard**: Waste report viewing system
 
