@@ -249,11 +249,8 @@ npm run dev
 4. Push to the branch: `git push origin feature-name`
 5. Submit a pull request
 
-## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - [YOLOv8](https://github.com/ultralytics/ultralytics) for object detection
 - [Cloudinary](https://cloudinary.com/) for image processing
@@ -261,6 +258,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [shadcn/ui](https://ui.shadcn.com/) for UI components
 - [Django](https://www.djangoproject.com/) for backend framework
 
-## 📞 Support
-
-For support, email support@binsavvy.com or create an issue in this repository.
