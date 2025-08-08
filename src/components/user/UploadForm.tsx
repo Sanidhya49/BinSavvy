@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
 
 const UploadForm = () => {
-  const { user } = useAuth();
+  const { user, refreshData } = useAuth();
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -79,6 +79,8 @@ const UploadForm = () => {
     try {
       setLoading(true);
       
+      console.log('Uploading image with location:', address.trim() || "GPS Location");
+      
       // Use the backend API to upload the image
       const response = await apiClient.uploadImage(
         selectedFile,
@@ -88,18 +90,29 @@ const UploadForm = () => {
         false // Enable automatic ML processing
       );
       
-      toast.success("Image uploaded successfully!");
+      console.log('Upload response:', response);
       
-      // Clear form
-      setSelectedFile(null);
-      setPreviewUrl(null);
-      setAddress("");
-      setLatitude(null);
-      setLongitude(null);
-      setUseGps(false);
-      
-      // Navigate to history page
-      navigate("/history");
+      if (response.success) {
+        toast.success("Image uploaded successfully!");
+        
+        // Trigger global data refresh
+        refreshData();
+        
+        // Clear form
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        setAddress("");
+        setLatitude(null);
+        setLongitude(null);
+        setUseGps(false);
+        
+        // Navigate to history page after a short delay to ensure backend processes the image
+        setTimeout(() => {
+          navigate("/history");
+        }, 1000);
+      } else {
+        toast.error(response.error || "Failed to upload image");
+      }
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload image. Please try again.");

@@ -1,122 +1,165 @@
 
-import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { AuthContextType, User } from "@/types/auth";
-import { apiClient } from "@/lib/api";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiClient } from '@/lib/api';
+import { authManager, JWTPayload } from '@/lib/auth';
+import { User } from '@/lib/api';
+
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: (username: string, password: string) => Promise<boolean>;
+  register: (userData: any) => Promise<boolean>;
+  logout: () => void;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  refreshData: () => void;
+  lastDataRefresh: Date | null;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Check for saved user in localStorage
-    const savedUser = localStorage.getItem('binsavvy-user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem('binsavvy-user');
-      }
-    }
-    setLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // For now, use a simple check since we don't have full Firebase auth yet
-      // In a real app, this would call Firebase Auth or your backend auth endpoint
-      
-      // Check if backend is running
-      try {
-        await apiClient.checkUserServiceHealth();
-      } catch (backendError) {
-        throw new Error("Backend service is not available. Please start the Django server.");
-      }
-      
-      // For demo purposes, allow these test accounts
-      const validEmails = [
-        'admin@binsavvy.com',
-        'user@binsavvy.com',
-        'test@binsavvy.com'
-      ];
-      
-      if (!validEmails.includes(email)) {
-        throw new Error("Invalid email or password. Try: admin@binsavvy.com or user@binsavvy.com");
-      }
-      
-      // Create user object
-      const userData: User = {
-        id: email === 'admin@binsavvy.com' ? 'admin-1' : 'user-1',
-        email,
-        name: email === 'admin@binsavvy.com' ? 'Admin User' : 'Demo User',
-        role: email === 'admin@binsavvy.com' ? 'admin' : 'user',
-        createdAt: new Date().toISOString()
-      };
-      
-      // Save user to state and localStorage
-      setUser(userData);
-      localStorage.setItem('binsavvy-user', JSON.stringify(userData));
-      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const register = async (email: string, password: string, name: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Check if backend is running
-      try {
-        await apiClient.checkUserServiceHealth();
-      } catch (backendError) {
-        throw new Error("Backend service is not available. Please start the Django server.");
-      }
-      
-      // For demo purposes, create a new user
-      const userData: User = {
-        id: `user-${Date.now()}`,
-        email,
-        name,
-        role: "user",
-        createdAt: new Date().toISOString()
-      };
-      
-      // Save user to state and localStorage
-      setUser(userData);
-      localStorage.setItem('binsavvy-user', JSON.stringify(userData));
-      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('binsavvy-user');
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    // Return a default context instead of throwing an error
+    console.warn('useAuth called outside of AuthProvider, returning default values');
+    return {
+      user: null,
+      loading: false,
+      login: async () => false,
+      register: async () => false,
+      logout: () => {},
+      isAuthenticated: false,
+      isAdmin: false,
+      refreshData: () => {},
+      lastDataRefresh: null,
+    };
   }
   return context;
+};
+
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [lastDataRefresh, setLastDataRefresh] = useState<Date | null>(null);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        // For demo, just check if we have tokens and set loading to false
+        // Don't make API calls on mount to avoid 401 errors
+        const hasTokens = authManager.isAuthenticated();
+        console.log('Auth check - has tokens:', hasTokens);
+        
+        // If we have tokens, we'll let the user navigate and handle auth on demand
+        if (hasTokens) {
+          // Don't set user here, let it be set after successful login
+          console.log('Tokens found, but not setting user on mount');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        authManager.logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  const refreshData = () => {
+    console.log('Global data refresh triggered');
+    setLastDataRefresh(new Date());
+  };
+
+  const login = async (username: string, password: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      console.log('AuthContext: Attempting login for:', username);
+      
+      const response = await apiClient.login(username, password);
+      console.log('AuthContext: Login response:', response);
+      
+      if (response.success && response.data) {
+        console.log('AuthContext: Setting user:', response.data.user);
+        setUser(response.data.user);
+        setIsAuthenticated(true); // Set authentication state immediately
+        
+        // Force a re-render by updating state
+        console.log('AuthContext: Login successful, user set:', response.data.user);
+        
+        return true;
+      } else {
+        console.error('AuthContext: Login failed:', response.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('AuthContext: Login error:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (userData: any): Promise<boolean> => {
+    try {
+      setLoading(true);
+      console.log('AuthContext: Attempting registration for:', userData.username);
+      
+      const response = await apiClient.register(userData);
+      console.log('AuthContext: Registration response:', response);
+      
+      if (response.success && response.data) {
+        // After successful registration, log the user in
+        return await login(userData.username, userData.password);
+      } else {
+        console.error('AuthContext: Registration failed:', response.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('AuthContext: Registration error:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await apiClient.logout();
+    } catch (error) {
+      console.error('AuthContext: Logout error:', error);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false); // Clear authentication state
+      authManager.logout();
+    }
+  };
+
+  // Use local state for isAuthenticated instead of authManager
+  const isAdmin = user?.role === 'admin' || false;
+
+  const value: AuthContextType = {
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    isAuthenticated,
+    isAdmin,
+    refreshData,
+    lastDataRefresh,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

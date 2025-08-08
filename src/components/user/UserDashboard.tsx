@@ -1,30 +1,39 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Image, BarChart3, Settings, User, MapPin, Calendar, Eye } from 'lucide-react';
-import BackendStatus from '../BackendStatus';
+import { Upload, Image, BarChart3, Settings, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClient, ImageUpload } from '@/lib/api';
-import { formatDistanceToNow } from 'date-fns';
 
 export default function UserDashboard() {
   const { user } = useAuth();
   const [recentImages, setRecentImages] = useState<ImageUpload[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchRecentImages = async () => {
     try {
       setLoading(true);
+      console.log('Fetching recent images for user dashboard...');
+      
       const response = await apiClient.getUserImages();
-      if (response.data) {
+      console.log('User dashboard response:', response);
+      
+      if (response.success && response.data) {
+        // Handle backend response format: { data: [...] }
+        const imagesArray = Array.isArray(response.data) ? response.data : response.data.data || [];
+        
         // Get the latest 3 images
-        const latestImages = response.data
+        const latestImages = imagesArray
           .sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime())
           .slice(0, 3);
+        console.log('Setting recent images:', latestImages);
         setRecentImages(latestImages);
+      } else {
+        console.log('No images found or API error:', response.error);
+        setRecentImages([]);
       }
     } catch (error) {
       console.error('Error fetching recent images:', error);
@@ -36,29 +45,26 @@ export default function UserDashboard() {
 
   useEffect(() => {
     fetchRecentImages();
+    
+    // Set up auto-refresh every 20 seconds for user dashboard
+    const interval = setInterval(() => {
+      console.log('Auto-refreshing user dashboard...');
+      fetchRecentImages();
+    }, 20000);
+    
+    return () => clearInterval(interval);
   }, []);
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: { variant: 'secondary' as const, text: 'Pending' },
-      processing: { variant: 'default' as const, text: 'Processing' },
-      completed: { variant: 'default' as const, text: 'Completed' },
-      failed: { variant: 'destructive' as const, text: 'Failed' },
+  // Refresh when component comes into focus
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('User dashboard focused, refreshing data...');
+      fetchRecentImages();
     };
-
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
     
-    return (
-      <Badge variant={config.variant} className="text-xs">
-        {config.text}
-      </Badge>
-    );
-  };
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.target as HTMLImageElement;
-    target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='%236b7280' text-anchor='middle' dy='.3em'%3EImage not available%3C/text%3E%3C/svg%3E";
-  };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -72,6 +78,32 @@ export default function UserDashboard() {
           <Badge variant="secondary">User Dashboard</Badge>
         </div>
       </div>
+
+      {/* User Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Welcome, {user?.username || 'User'}!</CardTitle>
+          <CardDescription>
+            You are logged in as a {user?.role || 'user'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <strong>Username:</strong> {user?.username}
+            </div>
+            <div>
+              <strong>Email:</strong> {user?.email}
+            </div>
+            <div>
+              <strong>Role:</strong> {user?.role}
+            </div>
+            <div>
+              <strong>Admin:</strong> {user?.is_admin ? 'Yes' : 'No'}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -133,45 +165,41 @@ export default function UserDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BackendStatus />
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Quick Actions
-            </CardTitle>
-            <CardDescription>
-              Common actions and settings for your account
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" asChild>
-                <a href="/upload">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload New Image
-                </a>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <a href="/history">
-                  <Image className="h-4 w-4 mr-2" />
-                  View All Images
-                </a>
-              </Button>
-              <Button variant="outline" size="sm">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                View Analytics
-              </Button>
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Account Settings
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Quick Actions
+          </CardTitle>
+          <CardDescription>
+            Common actions and settings for your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href="/upload">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload New Image
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href="/history">
+                <Image className="h-4 w-4 mr-2" />
+                View All Images
+              </a>
+            </Button>
+            <Button variant="outline" size="sm">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              View Analytics
+            </Button>
+            <Button variant="outline" size="sm">
+              <Settings className="h-4 w-4 mr-2" />
+              Account Settings
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Recent Activity */}
       <Card>
@@ -186,6 +214,19 @@ export default function UserDashboard() {
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
               <span className="ml-2">Loading recent uploads...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-500">
+              <p>Error loading recent uploads</p>
+              <p className="text-sm">{error}</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={fetchRecentImages}
+                className="mt-2"
+              >
+                Retry
+              </Button>
             </div>
           ) : recentImages.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
@@ -202,10 +243,15 @@ export default function UserDashboard() {
                       src={image.image_url}
                       alt={`Waste image from ${image.location}`}
                       className="w-full h-full object-cover rounded"
-                      onError={handleImageError}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='%236b7280' text-anchor='middle' dy='.3em'%3EImage not available%3C/text%3E%3C/svg%3E";
+                      }}
                     />
                     <div className="absolute -top-1 -right-1">
-                      {getStatusBadge(image.status)}
+                      <Badge variant="secondary" className="text-xs">
+                        {image.status}
+                      </Badge>
                     </div>
                   </div>
                   
@@ -215,12 +261,11 @@ export default function UserDashboard() {
                         {image.location || "Location Not Specified"}
                       </h4>
                       <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(image.uploaded_at), { addSuffix: true })}
+                        {new Date(image.uploaded_at).toLocaleDateString()}
                       </span>
                     </div>
                     
                     <div className="flex items-center gap-2 mt-1">
-                      <MapPin className="h-3 w-3 text-gray-400" />
                       <span className="text-xs text-gray-600">
                         {image.latitude && image.longitude 
                           ? `${image.latitude.toFixed(4)}, ${image.longitude.toFixed(4)}`
@@ -228,19 +273,11 @@ export default function UserDashboard() {
                         }
                       </span>
                     </div>
-                    
-                    {image.analysis_results && image.analysis_results.detections && (
-                      <div className="mt-1">
-                        <span className="text-xs text-green-600 font-medium">
-                          {image.analysis_results.detections.length} items detected
-                        </span>
-                      </div>
-                    )}
                   </div>
                   
                   <Button variant="outline" size="sm" asChild>
                     <a href={`/history`}>
-                      <Eye className="h-3 w-3" />
+                      <Image className="h-3 w-3" />
                     </a>
                   </Button>
                 </div>

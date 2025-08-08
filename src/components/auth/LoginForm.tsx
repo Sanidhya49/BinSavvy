@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,35 +13,66 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ onToggleForm }: LoginFormProps) => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { login, error, loading } = useAuth();
+  const { login, loading } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login form submitted with:', { username, password });
     try {
-      await login(email, password);
-      toast.success("Login successful!");
+      const success = await login(username, password);
+      console.log('Login result:', success);
+      if (success) {
+        toast.success("Login successful!");
+        console.log('Redirecting to dashboard...');
+        // Navigate immediately after successful login
+        navigate("/dashboard");
+      } else {
+        toast.error("Login failed. Please check your credentials.");
+      }
     } catch (err) {
-      // Error handling is done in the auth context
+      console.error('Login error:', err);
+      toast.error("Login failed. Please try again.");
     }
   };
 
   const loginAsAdmin = async () => {
+    console.log('Login as Admin clicked');
     try {
-      await login("admin@binsavvy.com", "password");
-      toast.success("Admin login successful!");
+      const success = await login("admin", "admin123");
+      console.log('Admin login result:', success);
+      if (success) {
+        toast.success("Admin login successful!");
+        console.log('Redirecting to admin...');
+        // Navigate immediately after successful login
+        navigate("/admin");
+      } else {
+        toast.error("Admin login failed.");
+      }
     } catch (err) {
-      // Error handling is done in the auth context
+      console.error('Admin login error:', err);
+      toast.error("Admin login failed. Please try again.");
     }
   };
 
   const loginAsUser = async () => {
+    console.log('Login as User clicked');
     try {
-      await login("user@binsavvy.com", "password");
-      toast.success("User login successful!");
+      const success = await login("user", "user123");
+      console.log('User login result:', success);
+      if (success) {
+        toast.success("User login successful!");
+        console.log('Redirecting to dashboard...');
+        // Navigate immediately after successful login
+        navigate("/dashboard");
+      } else {
+        toast.error("User login failed.");
+      }
     } catch (err) {
-      // Error handling is done in the auth context
+      console.error('User login error:', err);
+      toast.error("User login failed. Please try again.");
     }
   };
 
@@ -54,19 +86,14 @@ const LoginForm = ({ onToggleForm }: LoginFormProps) => {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
-              {error}
-            </div>
-          )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
@@ -140,8 +167,8 @@ const LoginForm = ({ onToggleForm }: LoginFormProps) => {
             <ul className="text-xs text-blue-700 space-y-1">
               <li>• <strong>Backend Required:</strong> Start Django server first</li>
               <li>• <strong>Quick Login:</strong> Use "Login as Admin" or "Login as User" buttons</li>
-              <li>• <strong>Manual Login:</strong> Try admin@binsavvy.com or user@binsavvy.com</li>
-              <li>• <strong>Any Password:</strong> Password field can be anything for demo</li>
+              <li>• <strong>Manual Login:</strong> Try username: "admin" or "user"</li>
+              <li>• <strong>Passwords:</strong> "admin123" for admin, "user123" for user</li>
             </ul>
           </div>
         </CardFooter>

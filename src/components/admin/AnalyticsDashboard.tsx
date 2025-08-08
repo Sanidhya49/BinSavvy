@@ -61,7 +61,9 @@ const AnalyticsDashboard = () => {
       
       // Fetch all images from backend
       const response = await apiClient.getUserImages();
-      const allUploads = response.data || [];
+      
+      // Handle backend response format: { data: [...] }
+      const allUploads = Array.isArray(response.data) ? response.data : response.data?.data || [];
       
       // Filter by time range
       const filteredUploads = filterByTimeRange(allUploads, timeRange);

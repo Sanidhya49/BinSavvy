@@ -366,3 +366,49 @@ coverage/
 *.pid
 *.seed
 *.pid.lock
+
+# Additional project-specific ignores
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+
+# Frontend
+src/.vscode/
+*.local
+
+# Test files
+test_*.py
+*_test.py
+*.test.js
+*.test.ts
+*.test.tsx
+
+# Documentation
+docs/_build/
+site/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Cache directories
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+
+# Lock files (keep package-lock.json and yarn.lock)
+# yarn.lock
+# package-lock.json
+
+# Local development
+.env.local
+.env.development
+.env.test
+.env.production

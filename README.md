@@ -5,7 +5,7 @@ A comprehensive web platform for smart waste analysis using AI and machine learn
 ## 🚀 Features
 
 ### For Users:
-- **User Authentication**: Secure registration and login system
+- **User Authentication**: Secure registration and login system with demo accounts
 - **Image Upload**: Upload photos with location data and GPS coordinates
 - **Upload History**: View and manage all uploaded images with real-time status
 - **Dashboard**: View recent activity and upload statistics
@@ -17,6 +17,8 @@ A comprehensive web platform for smart waste analysis using AI and machine learn
 - **ML Model Integration**: Run YOLOv8 and Roboflow models for waste detection
 - **ML Configuration**: Configure models, thresholds, and processing settings
 - **System Monitoring**: Real-time health checks for all services
+- **Analytics Dashboard**: Comprehensive waste analytics and insights
+- **Enhanced ML Processor**: Batch processing and job management
 
 ## 🛠️ Tech Stack
 
@@ -148,10 +150,20 @@ npm run dev
 
 The frontend will be available at `http://localhost:8080`
 
+## 🔐 Demo Accounts
+
+For testing purposes, the following demo accounts are available:
+
+- **Admin Account**: `admin` / `admin123`
+- **User Account**: `user` / `user123`
+
 ## 📡 API Endpoints
 
 ### Authentication
+- `POST /api/users/login/` - User login
 - `POST /api/users/register/` - Register new user
+- `POST /api/users/logout/` - User logout
+- `POST /api/users/refresh/` - Refresh JWT token
 - `GET /api/users/profile/` - Get user profile
 - `PUT /api/users/profile/update/` - Update user profile
 
@@ -160,6 +172,7 @@ The frontend will be available at `http://localhost:8080`
 - `GET /api/images/list/` - Get user's images
 - `GET /api/images/{id}/` - Get specific image details
 - `DELETE /api/images/{id}/delete/` - Delete image
+- `POST /api/images/{id}/reprocess/` - Reprocess image with ML
 
 ### Health Checks
 - `GET /api/users/health/` - User service health check
@@ -198,6 +211,10 @@ npm run dev
 - **Enhanced Admin Dashboard**: System health monitoring and management
 - **ML Configuration Panel**: Model settings and thresholds
 - **Government Dashboard**: Waste report viewing system
+- **Analytics Dashboard**: Comprehensive waste analytics
+- **Enhanced ML Processor**: Batch processing and job management
+- **JWT Authentication**: Token-based authentication (demo mode)
+- **Real-time Updates**: Auto-refresh and focus-based updates
 
 ### 🚧 In Progress:
 - **Real-time Updates**: WebSocket integration for live status updates

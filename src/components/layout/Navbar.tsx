@@ -16,6 +16,12 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Get user initials safely
+  const getUserInitials = () => {
+    if (!user?.username) return "U";
+    return user.username.charAt(0).toUpperCase();
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -66,7 +72,7 @@ const Navbar = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <div className="bg-binsavvy-200 text-binsavvy-700 rounded-full w-9 h-9 flex items-center justify-center">
-                    {user.name.charAt(0)}
+                    {getUserInitials()}
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -74,7 +80,7 @@ const Navbar = () => {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="flex flex-col items-start">
-                  <span className="font-medium">{user.name}</span>
+                  <span className="font-medium">{user.username}</span>
                   <span className="text-xs text-muted-foreground">{user.email}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

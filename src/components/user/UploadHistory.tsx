@@ -11,10 +11,12 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  BarChart3
+  BarChart3,
+  X
 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AnalysisResults {
   message?: string;
@@ -36,26 +38,46 @@ interface ImageUpload {
   latitude?: number;
   longitude?: number;
   uploaded_at: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'ml_failed' | 'ml_unavailable';
   processed_image_url?: string;
   analysis_results?: AnalysisResults;
   error_message?: string;
 }
 
 export default function UploadHistory() {
+  const { refreshData, lastDataRefresh } = useAuth();
   const [uploads, setUploads] = useState<ImageUpload[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<ImageUpload | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   const fetchUploads = async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log('Fetching uploads...');
+      
       const response = await apiClient.getUserImages();
-      if (response.data) {
-        setUploads(response.data);
+      console.log('Uploads response:', response);
+      
+      if (response.success && response.data) {
+        // Handle backend response format: { data: [...] }
+        const uploadsData = Array.isArray(response.data) ? response.data : response.data.data || [];
+        console.log('Setting uploads:', uploadsData);
+        setUploads(uploadsData);
+        setLastRefresh(new Date());
+      } else {
+        console.log('No uploads found or API error:', response.error);
+        setUploads([]);
+        if (response.error) {
+          setError(response.error);
+        }
       }
     } catch (error) {
       console.error('Error fetching uploads:', error);
+      setError('Failed to load uploads');
+      setUploads([]);
     } finally {
       setLoading(false);
     }
@@ -63,7 +85,34 @@ export default function UploadHistory() {
 
   useEffect(() => {
     fetchUploads();
+    
+    // Set up auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      console.log('Auto-refreshing uploads...');
+      fetchUploads();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
+
+  // Refresh when component comes into focus
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('Page focused, refreshing uploads...');
+      fetchUploads();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  // Listen for global refresh events
+  useEffect(() => {
+    if (lastDataRefresh) {
+      console.log('Global refresh detected, updating uploads...');
+      fetchUploads();
+    }
+  }, [lastDataRefresh]);
 
   const getStatusBadge = (status: string, analysisResults?: AnalysisResults) => {
     const statusConfig = {
@@ -71,6 +120,8 @@ export default function UploadHistory() {
       processing: { variant: 'default' as const, text: 'Processing', icon: Clock },
       completed: { variant: 'default' as const, text: 'Completed', icon: CheckCircle },
       failed: { variant: 'destructive' as const, text: 'Failed', icon: AlertTriangle },
+      ml_failed: { variant: 'destructive' as const, text: 'ML Failed', icon: AlertTriangle },
+      ml_unavailable: { variant: 'secondary' as const, text: 'ML Unavailable', icon: AlertTriangle },
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
@@ -100,7 +151,11 @@ export default function UploadHistory() {
   };
 
   const formatDate = (dateString: string) => {
-    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch (error) {
+      return 'Unknown date';
+    }
   };
 
   if (loading) {
@@ -124,6 +179,18 @@ export default function UploadHistory() {
           Refresh
         </Button>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm">{error}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Uploads Grid */}
       {uploads.length === 0 ? (
@@ -154,7 +221,7 @@ export default function UploadHistory() {
               
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium truncate">
-                  {upload.location}
+                  {upload.location || 'Unknown Location'}
                 </CardTitle>
                 <CardDescription className="flex items-center gap-1 text-xs">
                   <Calendar className="h-3 w-3" />
@@ -230,77 +297,72 @@ export default function UploadHistory() {
                   size="sm"
                   onClick={() => setSelectedImage(null)}
                 >
-                  ×
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
               
               <div className="space-y-4">
-                <div className="aspect-video">
+                <div className="aspect-video relative">
                   <img
                     src={selectedImage.image_url}
                     alt={`Waste image from ${selectedImage.location}`}
                     className="w-full h-full object-cover rounded"
                     onError={handleImageError}
                   />
+                  <div className="absolute top-2 right-2">
+                    {getStatusBadge(selectedImage.status, selectedImage.analysis_results)}
+                  </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <h4 className="font-semibold mb-2">Location Information</h4>
-                    <p className="text-sm text-gray-600">{selectedImage.location}</p>
-                    {selectedImage.latitude && selectedImage.longitude && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        GPS: {selectedImage.latitude}, {selectedImage.longitude}
-                      </p>
-                    )}
+                    <strong>Location:</strong> {selectedImage.location || 'Unknown'}
                   </div>
-                  
                   <div>
-                    <h4 className="font-semibold mb-2">Upload Status</h4>
-                    {getStatusBadge(selectedImage.status, selectedImage.analysis_results)}
-                    <p className="text-sm text-gray-600 mt-1">
-                      {formatDate(selectedImage.uploaded_at)}
-                    </p>
+                    <strong>Uploaded:</strong> {formatDate(selectedImage.uploaded_at)}
                   </div>
+                  <div>
+                    <strong>Status:</strong> {selectedImage.status}
+                  </div>
+                  {selectedImage.latitude && selectedImage.longitude && (
+                    <div>
+                      <strong>GPS:</strong> {selectedImage.latitude.toFixed(4)}, {selectedImage.longitude.toFixed(4)}
+                    </div>
+                  )}
                 </div>
-
-                {selectedImage.analysis_results && Object.keys(selectedImage.analysis_results).length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Analysis Results</h4>
-                    <div className="bg-gray-100 p-4 rounded">
-                      <div className="grid grid-cols-2 gap-4">
+                
+                {selectedImage.analysis_results && (
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold mb-2">Analysis Results</h3>
+                    <div className="space-y-2 text-sm">
+                      {selectedImage.analysis_results.total_detections && (
                         <div>
-                          <p className="text-sm font-medium">Total Detections</p>
-                          <p className="text-lg font-bold text-green-600">
-                            {selectedImage.analysis_results.total_detections || 0}
-                          </p>
+                          <strong>Total Detections:</strong> {selectedImage.analysis_results.total_detections}
                         </div>
+                      )}
+                      {selectedImage.analysis_results.model_used && (
                         <div>
-                          <p className="text-sm font-medium">Model Used</p>
-                          <p className="text-sm text-gray-600">
-                            {selectedImage.analysis_results.model_used || 'N/A'}
-                          </p>
+                          <strong>Model Used:</strong> {selectedImage.analysis_results.model_used}
                         </div>
-                      </div>
-                      
+                      )}
+                      {selectedImage.analysis_results.average_confidence && (
+                        <div>
+                          <strong>Average Confidence:</strong> {(selectedImage.analysis_results.average_confidence * 100).toFixed(1)}%
+                        </div>
+                      )}
                       {selectedImage.analysis_results.message && (
-                        <div className="mt-4">
-                          <p className="text-sm font-medium mb-2">Message</p>
-                          <p className="text-sm text-gray-600">
-                            {selectedImage.analysis_results.message}
-                          </p>
+                        <div className="text-yellow-600">
+                          <strong>Message:</strong> {selectedImage.analysis_results.message}
                         </div>
                       )}
                     </div>
                   </div>
                 )}
-
+                
                 {selectedImage.error_message && (
-                  <div>
-                    <h4 className="font-semibold mb-2 text-red-600">Error Information</h4>
-                    <div className="bg-red-50 p-4 rounded border border-red-200">
-                      <p className="text-sm text-red-800">{selectedImage.error_message}</p>
-                    </div>
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold mb-2 text-red-600">Error</h3>
+                    <p className="text-sm text-red-600">{selectedImage.error_message}</p>
                   </div>
                 )}
               </div>

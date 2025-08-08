@@ -15,6 +15,8 @@ const UploadsManagement = () => {
   const [selectedUpload, setSelectedUpload] = useState<ImageUpload | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "processing" | "completed" | "ml_failed" | "ml_unavailable">("all");
   const [processingUpload, setProcessingUpload] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   useEffect(() => {
     fetchUploads();
@@ -23,17 +25,29 @@ const UploadsManagement = () => {
   const fetchUploads = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.getUserImages();
-      const allUploads = response.data || [];
-      setUploads(allUploads);
+      setError(null);
+      console.log('Fetching uploads for management...');
       
-      // Auto-select first upload if none selected
-      if (!selectedUpload && allUploads.length > 0) {
-        setSelectedUpload(allUploads[0]);
+      const response = await apiClient.getUserImages();
+      console.log('Uploads management response:', response);
+      
+      if (response.success && response.data) {
+        // Handle backend response format: { data: [...] }
+        const uploadsData = Array.isArray(response.data) ? response.data : response.data.data || [];
+        console.log('Setting uploads for management:', uploadsData);
+        setUploads(uploadsData);
+        setLastRefresh(new Date());
+      } else {
+        console.log('No uploads found or API error:', response.error);
+        setUploads([]);
+        if (response.error) {
+          setError(response.error);
+        }
       }
     } catch (error) {
-      console.error("Error fetching uploads:", error);
-      toast.error("Failed to load uploads");
+      console.error('Error fetching uploads for management:', error);
+      setError('Failed to load uploads');
+      setUploads([]);
     } finally {
       setLoading(false);
     }

@@ -107,7 +107,9 @@ const EnhancedMLProcessor = () => {
   const fetchPendingImages = async () => {
     try {
       const response = await apiClient.getUserImages();
-      const allImages = response.data || [];
+      
+      // Handle backend response format: { data: [...] }
+      const allImages = Array.isArray(response.data) ? response.data : response.data?.data || [];
       
       // Create processing jobs for pending and failed images
       const newJobs: ProcessingJob[] = allImages

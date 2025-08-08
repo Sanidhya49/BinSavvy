@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,20 +13,21 @@ interface RegisterFormProps {
 }
 
 const RegisterForm = ({ onToggleForm }: RegisterFormProps) => {
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const { register, error, loading } = useAuth();
+  const { register, loading } = useAuth();
+  const navigate = useNavigate();
 
   const validatePasswords = () => {
     if (password !== confirmPassword) {
       setPasswordError("Passwords do not match");
       return false;
     }
-    if (password.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
+    if (password.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
       return false;
     }
     setPasswordError("");
@@ -37,10 +39,22 @@ const RegisterForm = ({ onToggleForm }: RegisterFormProps) => {
     if (!validatePasswords()) return;
 
     try {
-      await register(email, password, name);
-      toast.success("Registration successful!");
+      const success = await register({
+        username,
+        email,
+        password,
+        phone_number: "",
+        address: ""
+      });
+      if (success) {
+        toast.success("Registration successful!");
+        // Navigate immediately after successful registration
+        navigate("/dashboard");
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
     } catch (err) {
-      // Error handling is done in the auth context
+      toast.error("Registration failed. Please try again.");
     }
   };
 
@@ -54,19 +68,14 @@ const RegisterForm = ({ onToggleForm }: RegisterFormProps) => {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
-              {error}
-            </div>
-          )}
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="name"
+              id="username"
               type="text"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>

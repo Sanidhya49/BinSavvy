@@ -55,47 +55,82 @@ const AdminDashboard = () => {
   
   const [recentUploads, setRecentUploads] = useState<ImageUpload[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-  useEffect(() => {
-    const fetchAdminData = async () => {
-      try {
-        setLoading(true);
+  const fetchAllUploads = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('Fetching all uploads for admin dashboard...');
+      
+      const response = await apiClient.getUserImages();
+      console.log('Admin dashboard response:', response);
+      
+      if (response.success && response.data) {
+        // Handle backend response format: { data: [...] }
+        const uploadsData = Array.isArray(response.data) ? response.data : response.data.data || [];
+        console.log('Setting all uploads:', uploadsData);
+        setRecentUploads(uploadsData);
         
-        // Fetch all images from backend
-        const response = await apiClient.getUserImages();
-        const allUploads = response.data || [];
+        // Calculate stats from uploads data
+        const totalUploads = uploadsData.length;
+        const pendingAnalysis = uploadsData.filter(upload => upload.status === 'pending' || upload.status === 'processing').length;
+        const processedImages = uploadsData.filter(upload => upload.status === 'completed').length;
+        const failedUploads = uploadsData.filter(upload => upload.status === 'failed' || upload.status === 'ml_failed').length;
         
-        // Calculate stats
-        const totalUploads = allUploads.length;
-        const pendingAnalysis = allUploads.filter(u => u.status === "processing").length;
-        const processedImages = allUploads.filter(u => u.status === "completed").length;
-        const failedUploads = allUploads.filter(u => u.status === "ml_failed" || u.status === "failed").length;
-        
-        // Calculate average processing time (mock data for now)
-        const averageProcessingTime = 2.5; // seconds
+        // Calculate average processing time (simplified)
+        const completedUploads = uploadsData.filter(upload => upload.status === 'completed');
+        const avgTime = completedUploads.length > 0 ? 15 : 0; // Simplified for demo
         
         setStats({
           totalUploads,
           pendingAnalysis,
           processedImages,
           failedUploads,
-          averageProcessingTime
+          averageProcessingTime: avgTime
         });
         
-        // Get recent uploads (last 4)
-        setRecentUploads(allUploads.slice(0, 4));
-        
-        // Check system health
-        await checkSystemHealth();
-        
-      } catch (error) {
-        console.error("Error fetching admin data:", error);
-      } finally {
-        setLoading(false);
+        setLastRefresh(new Date());
+      } else {
+        console.log('No uploads found or API error:', response.error);
+        setRecentUploads([]);
+        if (response.error) {
+          setError(response.error);
+        }
       }
+    } catch (error) {
+      console.error('Error fetching all uploads:', error);
+      setError('Failed to load uploads');
+      setRecentUploads([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllUploads();
+    checkSystemHealth();
+    
+    // Set up auto-refresh every 15 seconds for admin dashboard
+    const interval = setInterval(() => {
+      console.log('Auto-refreshing admin data...');
+      fetchAllUploads();
+      checkSystemHealth();
+    }, 15000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Refresh when component comes into focus
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('Admin page focused, refreshing data...');
+      fetchAllUploads();
     };
     
-    fetchAdminData();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const checkSystemHealth = async () => {
