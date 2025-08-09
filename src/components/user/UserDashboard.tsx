@@ -189,10 +189,7 @@ export default function UserDashboard() {
                 View All Images
               </a>
             </Button>
-            <Button variant="outline" size="sm">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              View Analytics
-            </Button>
+            
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
               Account Settings

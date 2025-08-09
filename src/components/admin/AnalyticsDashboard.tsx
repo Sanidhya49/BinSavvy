@@ -16,9 +16,11 @@ import {
   AlertTriangle,
   FileText
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { apiClient } from "@/lib/api";
-import { ImageUpload } from "@/types/waste";
+import { ImageUpload } from "@/lib/api";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, BarChart as RBarChart, Bar, ResponsiveContainer, PieChart as RPieChart, Pie, Legend, Cell } from "recharts";
 
 interface AnalyticsData {
   totalUploads: number;
@@ -50,6 +52,7 @@ const AnalyticsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('7d');
   const [exporting, setExporting] = useState(false);
+  const [filteredUploads, setFilteredUploads] = useState<ImageUpload[]>([]);
 
   useEffect(() => {
     fetchAnalytics();
@@ -59,86 +62,44 @@ const AnalyticsDashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch all images from backend
-      const response = await apiClient.getUserImages();
-      
-      // Handle backend response format: { data: [...] }
-      const allUploads = Array.isArray(response.data) ? response.data : response.data?.data || [];
-      
-      // Filter by time range
-      const filteredUploads = filterByTimeRange(allUploads, timeRange);
-      
-      // Calculate processing statistics
-      const processingStats = {
-        pending: filteredUploads.filter(u => u.status === 'pending').length,
-        processing: filteredUploads.filter(u => u.status === 'processing').length,
-        completed: filteredUploads.filter(u => u.status === 'completed').length,
-        failed: filteredUploads.filter(u => u.status === 'ml_failed' || u.status === 'failed').length
-      };
-      
-      // Calculate waste types
-      const wasteTypes: Record<string, number> = {};
-      filteredUploads.forEach(upload => {
-        if (upload.analysis_results && upload.analysis_results.detections) {
-          upload.analysis_results.detections.forEach((detection: any) => {
-            const wasteType = detection.class || 'Unknown';
-            wasteTypes[wasteType] = (wasteTypes[wasteType] || 0) + 1;
+      // Prefer admin aggregate API if available
+      const adminAgg = await apiClient.getAnalytics().catch((): { success: boolean } => ({ success: false }));
+
+      if (adminAgg && adminAgg.success && adminAgg.data) {
+        // Attempt to hydrate from backend aggregate; fallback to client calc if shape unexpected
+        const data = adminAgg.data as Partial<AnalyticsData> & { uploads?: ImageUpload[] };
+        if (data.uploads && Array.isArray(data.uploads)) {
+          const scoped = filterByTimeRange(data.uploads, timeRange);
+          const built = buildFromUploads(scoped);
+          setAnalytics(built);
+          setFilteredUploads(scoped);
+        } else {
+          // Use provided aggregates and empty recentActivity if not provided
+          setAnalytics({
+            totalUploads: data.totalUploads ?? 0,
+            processingStats: data.processingStats ?? { pending: 0, processing: 0, completed: 0, failed: 0 },
+            wasteTypes: data.wasteTypes ?? {},
+            locations: data.locations ?? {},
+            timeStats: data.timeStats ?? { averageProcessingTime: 0, totalProcessingTime: 0 },
+            recentActivity: (data.recentActivity as ImageUpload[]) ?? [],
           });
+          setFilteredUploads((data.recentActivity as ImageUpload[]) ?? []);
         }
-      });
-      
-      // Calculate locations
-      const locations: Record<string, number> = {};
-      filteredUploads.forEach(upload => {
-        if (upload.location) {
-          locations[upload.location] = (locations[upload.location] || 0) + 1;
-        }
-      });
-      
-      // Calculate time statistics (mock data for now)
-      const timeStats = {
-        averageProcessingTime: 2.5, // seconds
-        totalProcessingTime: filteredUploads.length * 2.5
-      };
-      
-      setAnalytics({
-        totalUploads: filteredUploads.length,
-        processingStats,
-        wasteTypes,
-        locations,
-        timeStats,
-        recentActivity: filteredUploads.slice(0, 5)
-      });
+      } else {
+        // Fallback: fetch uploads and compute client-side
+        const response = await apiClient.getUserImages();
+        const allUploads = Array.isArray(response.data) ? response.data : (response.data as { data?: ImageUpload[] })?.data || [];
+        const scoped = filterByTimeRange(allUploads, timeRange);
+        const built = buildFromUploads(scoped);
+        setAnalytics(built);
+        setFilteredUploads(scoped);
+      }
       
     } catch (error) {
       console.error("Error fetching analytics:", error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const filterByTimeRange = (uploads: ImageUpload[], range: string) => {
-    const now = new Date();
-    let cutoffDate: Date;
-    
-    switch (range) {
-      case '24h':
-        cutoffDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        break;
-      case '7d':
-        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case '30d':
-        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      default:
-        return uploads;
-    }
-    
-    return uploads.filter(upload => {
-      const uploadDate = new Date(upload.uploaded_at);
-      return uploadDate >= cutoffDate;
-    });
   };
 
   const exportAnalytics = async () => {
@@ -148,14 +109,14 @@ const AnalyticsDashboard = () => {
         analytics,
         timeRange,
         exportDate: new Date().toISOString(),
-        generatedBy: 'BinSavvy Analytics Dashboard'
+        generatedBy: 'BinSavvy Admin Analytics'
       };
       
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `binsavvy-analytics-${timeRange}.json`;
+      a.download = `binsavvy-admin-analytics-${timeRange}.json`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (error) {
@@ -164,6 +125,31 @@ const AnalyticsDashboard = () => {
       setExporting(false);
     }
   };
+
+  // Derived datasets for charts
+  const trendData = useMemo(() => buildTrendData(filteredUploads), [filteredUploads]);
+  const statusBars = useMemo(() => ([
+    { name: "Pending", value: analytics.processingStats.pending },
+    { name: "Processing", value: analytics.processingStats.processing },
+    { name: "Completed", value: analytics.processingStats.completed },
+    { name: "Failed", value: analytics.processingStats.failed },
+  ]), [analytics]);
+  const wastePieData = useMemo(() => Object.entries(analytics.wasteTypes).map(([name, value]) => ({ name, value })), [analytics]);
+  const pieColors = useMemo(
+    () => [
+      "#22c55e", // green-500
+      "#3b82f6", // blue-500
+      "#f59e0b", // amber-500
+      "#ef4444", // red-500
+      "#8b5cf6", // violet-500
+      "#06b6d4", // cyan-500
+      "#10b981", // emerald-500
+      "#e11d48", // rose-600
+      "#a3e635", // lime-400
+      "#d946ef", // fuchsia-500
+    ],
+    []
+  );
 
   const getSuccessRate = () => {
     const total = analytics.processingStats.completed + analytics.processingStats.failed;
@@ -264,44 +250,76 @@ const AnalyticsDashboard = () => {
         </Card>
       </div>
 
-      {/* Processing Status */}
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* Trend + Status */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Uploads Over Time</CardTitle>
+            <CardDescription>Daily uploads for the selected range</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {trendData.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">No data available</p>
+            ) : (
+              <ChartContainer config={{ uploads: { label: "Uploads", color: "hsl(var(--primary))" } }}>
+                <AreaChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip content={<ChartTooltipContent />} />
+                  <Area type="monotone" dataKey="count" stroke="var(--color-uploads)" fill="var(--color-uploads)" fillOpacity={0.2} />
+                </AreaChart>
+              </ChartContainer>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Processing Status</CardTitle>
             <CardDescription>Current processing pipeline status</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span className="text-sm">Pending</span>
-                </div>
-                <Badge variant="secondary">{analytics.processingStats.pending}</Badge>
+            <ChartContainer config={{ status: { label: "Count", color: "hsl(var(--muted-foreground))" } }}>
+              <RBarChart data={statusBars}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4,4,0,0]} />
+              </RBarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Waste Types + Top Locations */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Waste Types Distribution</CardTitle>
+            <CardDescription>Most commonly detected waste types</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {Object.keys(analytics.wasteTypes).length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                No waste types detected yet
+              </p>
+            ) : (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RPieChart>
+                    <Tooltip />
+                    <Legend />
+                    <Pie data={wastePieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90}>
+                      {wastePieData.map((entry, index) => (
+                        <Cell key={`cell-${entry.name}-${index}`} fill={pieColors[index % pieColors.length]} />
+                      ))}
+                    </Pie>
+                  </RPieChart>
+                </ResponsiveContainer>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm">Processing</span>
-                </div>
-                <Badge variant="secondary">{analytics.processingStats.processing}</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Completed</span>
-                </div>
-                <Badge variant="secondary">{analytics.processingStats.completed}</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-sm">Failed</span>
-                </div>
-                <Badge variant="secondary">{analytics.processingStats.failed}</Badge>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
@@ -319,7 +337,7 @@ const AnalyticsDashboard = () => {
               <div className="space-y-3">
                 {Object.entries(analytics.locations)
                   .sort(([,a], [,b]) => b - a)
-                  .slice(0, 5)
+                  .slice(0, 6)
                   .map(([location, count]) => (
                     <div key={location} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -334,36 +352,6 @@ const AnalyticsDashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Waste Types Distribution */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Waste Types Distribution</CardTitle>
-          <CardDescription>Most commonly detected waste types</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {Object.keys(analytics.wasteTypes).length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
-              No waste types detected yet
-            </p>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {Object.entries(analytics.wasteTypes)
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 6)
-                .map(([type, count]) => (
-                  <div key={type} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-primary rounded-full"></div>
-                      <span className="font-medium">{type}</span>
-                    </div>
-                    <Badge variant="outline">{count} detections</Badge>
-                  </div>
-                ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Recent Activity */}
       <Card>
@@ -397,7 +385,7 @@ const AnalyticsDashboard = () => {
                     <StatusBadge status={upload.status} />
                     {upload.analysis_results && (
                       <Badge variant="outline" className="text-xs">
-                        {upload.analysis_results.total_detections || 0} detections
+                        {(upload.analysis_results as { total_detections?: number })?.total_detections || 0} detections
                       </Badge>
                     )}
                   </div>
@@ -426,4 +414,78 @@ const StatusBadge = ({ status }: { status: string }) => {
   }
 };
 
-export default AnalyticsDashboard; 
+export default AnalyticsDashboard;
+
+// Helpers
+function filterByTimeRange(uploads: ImageUpload[], range: string) {
+  const now = new Date();
+  let cutoffDate: Date;
+  
+  switch (range) {
+    case '24h':
+      cutoffDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      break;
+    case '7d':
+      cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case '30d':
+      cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    default:
+      return uploads;
+  }
+  
+  return uploads.filter(upload => new Date(upload.uploaded_at) >= cutoffDate);
+}
+
+function buildFromUploads(filteredUploads: ImageUpload[]): AnalyticsData {
+  const processingStats = {
+    pending: filteredUploads.filter(u => u.status === 'pending').length,
+    processing: filteredUploads.filter(u => u.status === 'processing').length,
+    completed: filteredUploads.filter(u => u.status === 'completed').length,
+    failed: filteredUploads.filter(u => u.status === 'ml_failed' || u.status === 'failed').length
+  };
+  
+  const wasteTypes: Record<string, number> = {};
+  filteredUploads.forEach(upload => {
+    const results = upload.analysis_results as { detections?: Array<{ class?: string }> } | undefined;
+    if (results?.detections) {
+      results.detections.forEach((detection: { class?: string }) => {
+        const wasteType = detection.class || 'Unknown';
+        wasteTypes[wasteType] = (wasteTypes[wasteType] || 0) + 1;
+      });
+    }
+  });
+  
+  const locations: Record<string, number> = {};
+  filteredUploads.forEach(upload => {
+    if (upload.location) {
+      locations[upload.location] = (locations[upload.location] || 0) + 1;
+    }
+  });
+  
+  const timeStats = {
+    averageProcessingTime: 2.5,
+    totalProcessingTime: filteredUploads.length * 2.5
+  };
+  
+  return {
+    totalUploads: filteredUploads.length,
+    processingStats,
+    wasteTypes,
+    locations,
+    timeStats,
+    recentActivity: filteredUploads.slice(0, 5),
+  };
+}
+
+function buildTrendData(uploads: ImageUpload[]) {
+  const counts: Record<string, number> = {};
+  for (const u of uploads) {
+    const key = new Date(u.uploaded_at).toLocaleDateString();
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  return Object.entries(counts)
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+} 
