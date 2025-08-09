@@ -152,19 +152,19 @@ const MLConfigPanel = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Advanced ML Configuration</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-sky-600 bg-clip-text text-transparent">Advanced ML Configuration</h1>
           <p className="text-muted-foreground">Configure machine learning models and processing settings</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={runPerformanceTest} disabled={loading}>
+          <Button variant="outline" onClick={runPerformanceTest} disabled={loading} className="hover:shadow">
             <BarChart3 className="h-4 w-4 mr-2" />
             Performance Test
           </Button>
-          <Button variant="outline" onClick={testMLService} disabled={loading}>
+          <Button variant="outline" onClick={testMLService} disabled={loading} className="hover:shadow">
             <TestTube className="h-4 w-4 mr-2" />
             Test Service
           </Button>
-          <Button onClick={saveConfig} disabled={loading}>
+          <Button onClick={saveConfig} disabled={loading} className="hover:shadow">
             <Save className="h-4 w-4 mr-2" />
             Save Config
           </Button>
@@ -183,7 +183,7 @@ const MLConfigPanel = () => {
       )}
 
       {/* Model Selection */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Cpu className="h-5 w-5" />
@@ -199,7 +199,7 @@ const MLConfigPanel = () => {
                 value={config.primaryModel}
                 onValueChange={(value: 'roboflow' | 'yolo') => handleConfigChange('primaryModel', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="hover:shadow">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -218,7 +218,7 @@ const MLConfigPanel = () => {
                 value={config.fallbackModel}
                 onValueChange={(value: 'roboflow' | 'yolo') => handleConfigChange('fallbackModel', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="hover:shadow">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -248,7 +248,7 @@ const MLConfigPanel = () => {
       </Card>
 
       {/* Confidence Settings */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5" />
@@ -281,6 +281,7 @@ const MLConfigPanel = () => {
                 max="100"
                 value={config.minDetectionSize}
                 onChange={(e) => handleConfigChange('minDetectionSize', parseInt(e.target.value))}
+                className="hover:shadow"
               />
               <p className="text-xs text-muted-foreground">
                 Ignore detections smaller than this
@@ -295,6 +296,7 @@ const MLConfigPanel = () => {
                 max="100"
                 value={config.maxDetectionsPerImage}
                 onChange={(e) => handleConfigChange('maxDetectionsPerImage', parseInt(e.target.value))}
+                className="hover:shadow"
               />
               <p className="text-xs text-muted-foreground">
                 Limit detections to prevent clutter
@@ -305,7 +307,7 @@ const MLConfigPanel = () => {
       </Card>
 
       {/* Processing Settings */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5" />
@@ -321,7 +323,7 @@ const MLConfigPanel = () => {
                 value={config.batchSize.toString()}
                 onValueChange={(value) => handleConfigChange('batchSize', parseInt(value))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="hover:shadow">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -344,6 +346,7 @@ const MLConfigPanel = () => {
                 max="300"
                 value={config.processingTimeout}
                 onChange={(e) => handleConfigChange('processingTimeout', parseInt(e.target.value))}
+                className="hover:shadow"
               />
               <p className="text-xs text-muted-foreground">
                 Maximum time for processing
@@ -387,6 +390,7 @@ const MLConfigPanel = () => {
                   max="5"
                   value={config.maxRetries}
                   onChange={(e) => handleConfigChange('maxRetries', parseInt(e.target.value))}
+                  className="hover:shadow"
                 />
                 <p className="text-xs text-muted-foreground">
                   Maximum retry attempts for failed processing
@@ -398,7 +402,7 @@ const MLConfigPanel = () => {
       </Card>
 
       {/* Performance Tracking */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
@@ -451,7 +455,7 @@ const MLConfigPanel = () => {
       </Card>
 
       {/* Model Performance */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle>Model Performance</CardTitle>
           <CardDescription>Current performance metrics for each model</CardDescription>
@@ -459,7 +463,7 @@ const MLConfigPanel = () => {
         <CardContent>
           <div className="space-y-4">
             {performance.map((model, index) => (
-              <div key={index} className="border rounded-lg p-4">
+              <div key={index} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-medium">{model.model}</h4>
                   <Badge variant="outline" className="text-xs">
@@ -487,7 +491,7 @@ const MLConfigPanel = () => {
       </Card>
 
       {/* Current Configuration Summary */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle>Current Configuration</CardTitle>
           <CardDescription>Summary of active settings</CardDescription>

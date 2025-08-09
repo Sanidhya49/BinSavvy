@@ -122,9 +122,9 @@ const UploadForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto border-0 shadow-sm hover:shadow-md transition-shadow">
       <CardHeader>
-        <CardTitle>Upload Waste Image</CardTitle>
+        <CardTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Upload Waste Image</CardTitle>
         <CardDescription>
           Upload photos of waste in your surroundings to help us analyze and address waste management issues. 
           Your uploads will be automatically processed using our ML models.
@@ -136,7 +136,7 @@ const UploadForm = () => {
             <Label htmlFor="image-upload">Upload Image</Label>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <div className="border rounded-md p-2">
+                <div className="border rounded-md p-2 hover:shadow-sm transition-shadow">
                   <Input
                     id="image-upload"
                     type="file"
@@ -173,7 +173,7 @@ const UploadForm = () => {
                 variant="outline"
                 size="sm"
                 onClick={getGeoLocation}
-                className="text-xs"
+                className="text-xs hover:shadow"
                 disabled={useGps && latitude !== null}
               >
                 {useGps && latitude !== null ? "GPS Location Captured" : "Use GPS"}

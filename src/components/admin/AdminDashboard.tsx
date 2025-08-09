@@ -21,6 +21,7 @@ import {
   Server,
   Zap
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface SystemHealth {
   backend: boolean;
@@ -57,6 +58,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
 
   const fetchAllUploads = async () => {
     try {
@@ -111,16 +113,28 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchAllUploads();
     checkSystemHealth();
-    
-    // Set up auto-refresh every 15 seconds for admin dashboard
-    const interval = setInterval(() => {
-      console.log('Auto-refreshing admin data...');
-      fetchAllUploads();
-      checkSystemHealth();
-    }, 15000);
-    
-    return () => clearInterval(interval);
   }, []);
+
+  // Optional auto-refresh with visibility guard
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const tick = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Auto-refreshing admin data...');
+        fetchAllUploads();
+        checkSystemHealth();
+      }
+    };
+    const interval = setInterval(tick, 15000);
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') tick();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [autoRefresh]);
 
   // Refresh when component comes into focus
   useEffect(() => {
@@ -182,15 +196,23 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <Button variant="outline" size="sm">
-          <Settings className="h-4 w-4 mr-2" />
-          System Settings
-        </Button>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+          Admin Dashboard
+        </h1>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Auto refresh</span>
+            <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
+          </div>
+          <Button variant="outline" size="sm" className="hover:shadow-md transition-shadow">
+            <Settings className="h-4 w-4 mr-2" />
+            System Settings
+          </Button>
+        </div>
       </div>
       
       {/* System Health */}
-      <Card>
+      <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -204,7 +226,9 @@ const AdminDashboard = () => {
               <span className="text-sm font-medium">Overall Health</span>
               <span className="text-sm text-muted-foreground">{getHealthStatus().toFixed(0)}%</span>
             </div>
-            <Progress value={getHealthStatus()} className="h-2" />
+            <Progress value={getHealthStatus()} className="h-2 overflow-hidden">
+              {/* decorative gradient overlay via classNames is enough */}
+            </Progress>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="flex items-center gap-2">
@@ -230,7 +254,7 @@ const AdminDashboard = () => {
       
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-5">
-        <Card>
+        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Uploads</CardTitle>
             <Upload className="h-4 w-4 text-muted-foreground" />
@@ -243,7 +267,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -256,7 +280,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Processed</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
@@ -269,7 +293,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Failed</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
@@ -282,7 +306,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Avg Time</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -297,13 +321,13 @@ const AdminDashboard = () => {
       </div>
       
       {/* Quick Actions */}
-      <Card>
+      <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Quick Actions</CardTitle>
           <CardDescription>Access key platform functions</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="border rounded-md p-4 flex flex-col items-center justify-center space-y-3">
+          <div className="rounded-xl p-4 flex flex-col items-center justify-center space-y-3 bg-gradient-to-br from-blue-50 to-blue-100/30 border hover:shadow-md transition-all">
             <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
               <Upload className="h-6 w-6 text-blue-600" />
             </div>
@@ -313,12 +337,12 @@ const AdminDashboard = () => {
                 View and process all uploads
               </p>
             </div>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full hover:shadow">
               <Link to="/admin/uploads">Go to Uploads</Link>
             </Button>
           </div>
           
-          <div className="border rounded-md p-4 flex flex-col items-center justify-center space-y-3">
+          <div className="rounded-xl p-4 flex flex-col items-center justify-center space-y-3 bg-gradient-to-br from-green-50 to-green-100/30 border hover:shadow-md transition-all">
             <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
               <BarChart3 className="h-6 w-6 text-green-600" />
             </div>
@@ -328,12 +352,12 @@ const AdminDashboard = () => {
                 Insights and reporting data
               </p>
             </div>
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline" className="w-full hover:shadow">
               <Link to="/admin/analytics">View Analytics</Link>
             </Button>
           </div>
           
-          <div className="border rounded-md p-4 flex flex-col items-center justify-center space-y-3">
+          <div className="rounded-xl p-4 flex flex-col items-center justify-center space-y-3 bg-gradient-to-br from-purple-50 to-purple-100/30 border hover:shadow-md transition-all">
             <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
               <Settings className="h-6 w-6 text-purple-600" />
             </div>
@@ -343,37 +367,23 @@ const AdminDashboard = () => {
                 Configure models and thresholds
               </p>
             </div>
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline" className="w-full hover:shadow">
               <Link to="/admin/settings">Configure</Link>
             </Button>
           </div>
           
-          <div className="border rounded-md p-4 flex flex-col items-center justify-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-              <Zap className="h-6 w-6 text-orange-600" />
-            </div>
-            <div className="space-y-1 text-center">
-              <h3 className="font-medium">ML Processor</h3>
-              <p className="text-xs text-muted-foreground">
-                Batch processing and optimization
-              </p>
-            </div>
-            <Button asChild variant="outline" className="w-full">
-              <Link to="/admin/ml-processor">Start Processing</Link>
-            </Button>
-          </div>
         </CardContent>
       </Card>
       
       {/* Recent Uploads */}
-      <Card>
+      <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Recent Uploads</CardTitle>
+              <CardTitle className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Recent Uploads</CardTitle>
               <CardDescription>Latest user contributions</CardDescription>
             </div>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" asChild className="hover:shadow">
               <Link to="/admin/uploads">View all</Link>
             </Button>
           </div>
@@ -386,12 +396,12 @@ const AdminDashboard = () => {
           ) : (
             <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
               {recentUploads.map((upload) => (
-                <div key={upload.image_id} className="overflow-hidden rounded-md border">
+                <div key={upload.image_id} className="overflow-hidden rounded-xl border bg-background hover:shadow-md transition-all hover:-translate-y-0.5">
                   <div className="aspect-square relative">
                     <img
                       src={upload.image_url}
                       alt="Uploaded waste"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-105"
                       onError={(e) => {
                         e.currentTarget.src = '/placeholder.svg';
                       }}

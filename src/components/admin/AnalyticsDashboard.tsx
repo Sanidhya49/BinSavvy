@@ -171,12 +171,12 @@ const AnalyticsDashboard = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Analytics Dashboard</h1>
           <p className="text-muted-foreground">Comprehensive insights into waste processing and analysis</p>
         </div>
         <div className="flex gap-2">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 hover:shadow">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -186,7 +186,7 @@ const AnalyticsDashboard = () => {
               <SelectItem value="all">All Time</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={exportAnalytics} disabled={exporting}>
+          <Button onClick={exportAnalytics} disabled={exporting} className="hover:shadow">
             <Download className="h-4 w-4 mr-2" />
             {exporting ? 'Exporting...' : 'Export'}
           </Button>
@@ -195,7 +195,7 @@ const AnalyticsDashboard = () => {
 
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Uploads</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -208,7 +208,7 @@ const AnalyticsDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -221,7 +221,7 @@ const AnalyticsDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Avg Processing</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -234,7 +234,7 @@ const AnalyticsDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Waste Types</CardTitle>
             <PieChart className="h-4 w-4 text-muted-foreground" />
@@ -252,9 +252,9 @@ const AnalyticsDashboard = () => {
 
       {/* Trend + Status */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 border-0 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Uploads Over Time</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Uploads Over Time</CardTitle>
             <CardDescription>Daily uploads for the selected range</CardDescription>
           </CardHeader>
           <CardContent>
@@ -274,9 +274,9 @@ const AnalyticsDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Processing Status</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">Processing Status</CardTitle>
             <CardDescription>Current processing pipeline status</CardDescription>
           </CardHeader>
           <CardContent>
@@ -295,9 +295,9 @@ const AnalyticsDashboard = () => {
 
       {/* Waste Types + Top Locations */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 border-0 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Waste Types Distribution</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Waste Types Distribution</CardTitle>
             <CardDescription>Most commonly detected waste types</CardDescription>
           </CardHeader>
           <CardContent>
@@ -323,9 +323,9 @@ const AnalyticsDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Top Locations</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-teal-600 to-sky-600 bg-clip-text text-transparent">Top Locations</CardTitle>
             <CardDescription>Most active waste reporting areas</CardDescription>
           </CardHeader>
           <CardContent>
@@ -354,9 +354,9 @@ const AnalyticsDashboard = () => {
       </div>
 
       {/* Recent Activity */}
-      <Card>
+      <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Recent Activity</CardTitle>
           <CardDescription>Latest uploads and processing activity</CardDescription>
         </CardHeader>
         <CardContent>
@@ -367,7 +367,7 @@ const AnalyticsDashboard = () => {
           ) : (
             <div className="space-y-3">
               {analytics.recentActivity.map((upload) => (
-                <div key={upload.image_id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={upload.image_id} className="flex items-center justify-between p-3 border rounded-lg hover:shadow-sm transition-shadow">
                   <div className="flex items-center gap-3">
                     <img 
                       src={upload.image_url} 

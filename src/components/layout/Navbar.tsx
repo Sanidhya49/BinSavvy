@@ -1,7 +1,8 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,14 @@ import { useAuth } from "@/contexts/AuthContext";
 const Navbar = () => {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path);
+  const navClass = (to: string) =>
+    cn(
+      "text-sm font-medium transition-colors hover:text-primary",
+      isActive(to) ? "text-foreground" : "text-muted-foreground"
+    );
 
   // Get user initials safely
   const getUserInitials = () => {
@@ -38,28 +47,28 @@ const Navbar = () => {
         <nav className="hidden md:flex mx-6 flex-1 items-center space-x-4 lg:space-x-6">
           {user?.role === "admin" ? (
             <>
-              <Link to="/admin" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link to="/admin" className={navClass("/admin")}> 
                 Dashboard
               </Link>
-              <Link to="/admin/uploads" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              <Link to="/admin/uploads" className={navClass("/admin/uploads")}>
                 User Uploads
               </Link>
-              <Link to="/admin/analytics" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              <Link to="/admin/analytics" className={navClass("/admin/analytics")}>
                 Analytics
               </Link>
-              <Link to="/admin/ml-processor" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              <Link to="/admin/ml-processor" className={navClass("/admin/ml-processor")}>
                 ML Processor
               </Link>
             </>
           ) : (
             <>
-              <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link to="/dashboard" className={navClass("/dashboard")}>
                 Dashboard
               </Link>
-              <Link to="/upload" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              <Link to="/upload" className={navClass("/upload")}>
                 Upload
               </Link>
-              <Link to="/history" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              <Link to="/history" className={navClass("/history")}>
                 History
               </Link>
             </>
@@ -138,14 +147,14 @@ const Navbar = () => {
               <>
                 <Link 
                   to="/admin" 
-                  className="text-sm font-medium py-2 px-1 rounded-md hover:bg-accent"
+                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/admin") && "text-foreground")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link 
                   to="/admin/uploads" 
-                  className="text-sm font-medium py-2 px-1 rounded-md hover:bg-accent"
+                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/admin/uploads") && "text-foreground")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   User Uploads
@@ -155,21 +164,21 @@ const Navbar = () => {
               <>
                 <Link 
                   to="/dashboard" 
-                  className="text-sm font-medium py-2 px-1 rounded-md hover:bg-accent"
+                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/dashboard") && "text-foreground")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link 
                   to="/upload" 
-                  className="text-sm font-medium py-2 px-1 rounded-md hover:bg-accent"
+                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/upload") && "text-foreground")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Upload
                 </Link>
                 <Link 
                   to="/history" 
-                  className="text-sm font-medium py-2 px-1 rounded-md hover:bg-accent"
+                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/history") && "text-foreground")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   History

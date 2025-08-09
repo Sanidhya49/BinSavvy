@@ -71,7 +71,7 @@ export default function UserDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Welcome to BinSavvy</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Welcome to BinSavvy</h1>
           <p className="text-gray-600">Upload and analyze waste images in your surroundings</p>
         </div>
         <div className="flex items-center gap-2">
@@ -80,9 +80,9 @@ export default function UserDashboard() {
       </div>
 
       {/* User Info */}
-      <Card>
+      <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
-          <CardTitle>Welcome, {user?.username || 'User'}!</CardTitle>
+          <CardTitle className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Welcome, {user?.username || 'User'}!</CardTitle>
           <CardDescription>
             You are logged in as a {user?.role || 'user'}
           </CardDescription>
@@ -107,7 +107,7 @@ export default function UserDashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Uploads</CardTitle>
             <Upload className="h-4 w-4 text-muted-foreground" />
@@ -120,7 +120,7 @@ export default function UserDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Processed</CardTitle>
             <Image className="h-4 w-4 text-muted-foreground" />
@@ -135,7 +135,7 @@ export default function UserDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -150,7 +150,7 @@ export default function UserDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Account</CardTitle>
             <User className="h-4 w-4 text-muted-foreground" />
@@ -165,9 +165,9 @@ export default function UserDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             <Settings className="h-5 w-5" />
             Quick Actions
           </CardTitle>
@@ -177,20 +177,20 @@ export default function UserDashboard() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" asChild className="hover:shadow">
               <a href="/upload">
                 <Upload className="h-4 w-4 mr-2" />
                 Upload New Image
               </a>
             </Button>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" asChild className="hover:shadow">
               <a href="/history">
                 <Image className="h-4 w-4 mr-2" />
                 View All Images
               </a>
             </Button>
             
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="hover:shadow">
               <Settings className="h-4 w-4 mr-2" />
               Account Settings
             </Button>
@@ -199,9 +199,9 @@ export default function UserDashboard() {
       </Card>
 
       {/* Recent Activity */}
-      <Card>
+      <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Recent Activity</CardTitle>
           <CardDescription>
             Your latest waste analysis contributions
           </CardDescription>
@@ -220,7 +220,7 @@ export default function UserDashboard() {
                 variant="outline" 
                 size="sm" 
                 onClick={fetchRecentImages}
-                className="mt-2"
+                className="mt-2 hover:shadow"
               >
                 Retry
               </Button>
@@ -234,12 +234,12 @@ export default function UserDashboard() {
           ) : (
             <div className="space-y-4">
               {recentImages.map((image) => (
-                <div key={image.image_id} className="flex items-center space-x-4 p-3 border rounded-lg">
+                <div key={image.image_id} className="flex items-center space-x-4 p-3 border rounded-lg hover:shadow-sm transition-shadow">
                   <div className="relative w-16 h-16 flex-shrink-0">
                     <img
                       src={image.image_url}
                       alt={`Waste image from ${image.location}`}
-                      className="w-full h-full object-cover rounded"
+                      className="w-full h-full object-cover rounded transform transition-transform duration-300 hover:scale-105"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='%236b7280' text-anchor='middle' dy='.3em'%3EImage not available%3C/text%3E%3C/svg%3E";
@@ -282,7 +282,7 @@ export default function UserDashboard() {
               
               {recentImages.length > 0 && (
                 <div className="text-center pt-2">
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="hover:shadow">
                     <a href="/history">
                       View All Images ({recentImages.length})
                     </a>

@@ -51,6 +51,7 @@ export default function UploadHistory() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<ImageUpload | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
 
   const fetchUploads = async () => {
     try {
@@ -85,15 +86,24 @@ export default function UploadHistory() {
 
   useEffect(() => {
     fetchUploads();
-    
-    // Set up auto-refresh every 30 seconds
-    const interval = setInterval(() => {
-      console.log('Auto-refreshing uploads...');
-      fetchUploads();
-    }, 30000);
-    
-    return () => clearInterval(interval);
   }, []);
+
+  // Optional auto-refresh like admin, visibility-guarded
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const tick = () => {
+      if (document.visibilityState === 'visible') fetchUploads();
+    };
+    const id = setInterval(tick, 30000);
+    const onVis = () => {
+      if (document.visibilityState === 'visible') tick();
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onVis);
+    };
+  }, [autoRefresh]);
 
   // Refresh when component comes into focus
   useEffect(() => {
@@ -172,17 +182,23 @@ export default function UploadHistory() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Upload History</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Upload History</h1>
           <p className="text-gray-600">View and manage your waste image contributions</p>
         </div>
-        <Button onClick={fetchUploads} variant="outline">
-          Refresh
-        </Button>
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Auto refresh</span>
+            <input type="checkbox" className="h-4 w-4" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
+          </div>
+          <Button onClick={fetchUploads} variant="outline" className="hover:shadow">
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Error Display */}
       {error && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-red-50 border-0 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-red-700">
               <AlertTriangle className="h-4 w-4" />
@@ -194,7 +210,7 @@ export default function UploadHistory() {
 
       {/* Uploads Grid */}
       {uploads.length === 0 ? (
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardContent className="flex flex-col items-center justify-center p-8 text-center">
             <AlertTriangle className="h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold mb-2">No uploads yet</h3>
@@ -206,12 +222,12 @@ export default function UploadHistory() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {uploads.map((upload) => (
-            <Card key={upload.image_id} className="overflow-hidden">
+            <Card key={upload.image_id} className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
               <div className="aspect-video relative">
                 <img
                   src={upload.image_url}
                   alt={`Waste image from ${upload.location}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-105"
                   onError={handleImageError}
                 />
                 <div className="absolute top-2 right-2">
@@ -274,6 +290,7 @@ export default function UploadHistory() {
                     variant="outline"
                     size="sm"
                     onClick={() => setSelectedImage(upload)}
+                    className="hover:shadow"
                   >
                     <Eye className="h-3 w-3 mr-1" />
                     View Details

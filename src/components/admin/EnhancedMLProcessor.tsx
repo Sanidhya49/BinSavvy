@@ -384,7 +384,7 @@ const EnhancedMLProcessor = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Enhanced ML Processor</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-fuchsia-600 bg-clip-text text-transparent">Enhanced ML Processor</h1>
           <p className="text-muted-foreground">
             Advanced batch processing with performance tracking
             <span className="ml-2 text-xs text-muted-foreground">
@@ -396,6 +396,7 @@ const EnhancedMLProcessor = () => {
           <Button 
             variant="outline"
             onClick={() => setShowUploadSection(!showUploadSection)}
+            className="hover:shadow"
           >
             <Upload className="h-4 w-4 mr-2" />
             {showUploadSection ? 'Hide Upload' : 'Add Images'}
@@ -403,7 +404,7 @@ const EnhancedMLProcessor = () => {
           <Button 
             onClick={startBatchProcessing} 
             disabled={isProcessing || jobs.filter(j => j.status === 'pending' || j.status === 'failed').length === 0}
-            className="button-gradient"
+            className="button-gradient hover:shadow"
           >
             <Play className="h-4 w-4 mr-2" />
             Start Processing
@@ -412,6 +413,7 @@ const EnhancedMLProcessor = () => {
             variant="outline" 
             onClick={pauseProcessing} 
             disabled={!isProcessing}
+            className="hover:shadow"
           >
             <Pause className="h-4 w-4 mr-2" />
             Pause
@@ -420,6 +422,7 @@ const EnhancedMLProcessor = () => {
             variant="outline" 
             onClick={stopProcessing} 
             disabled={!isProcessing}
+            className="hover:shadow"
           >
             <Square className="h-4 w-4 mr-2" />
             Stop
@@ -429,7 +432,7 @@ const EnhancedMLProcessor = () => {
 
       {/* Upload Section */}
       {showUploadSection && (
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
@@ -445,7 +448,7 @@ const EnhancedMLProcessor = () => {
                 multiple
                 accept="image/*"
                 onChange={handleFileSelect}
-                className="cursor-pointer"
+                className="cursor-pointer hover:shadow"
               />
               <p className="text-xs text-muted-foreground">
                 Select multiple images (JPEG, PNG, WebP). Max 10MB per file.
@@ -459,7 +462,7 @@ const EnhancedMLProcessor = () => {
                   <Button
                     onClick={handleBulkUpload}
                     disabled={uploading}
-                    className="button-gradient"
+                    className="button-gradient hover:shadow"
                   >
                     {uploading ? (
                       <>
@@ -477,7 +480,7 @@ const EnhancedMLProcessor = () => {
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {uploadItems.map((item) => (
-                    <div key={item.id} className="border rounded-lg p-4 space-y-3">
+                    <div key={item.id} className="border rounded-lg p-4 space-y-3 hover:shadow-sm transition-shadow">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium truncate">{item.file.name}</span>
                         <Button
@@ -493,7 +496,7 @@ const EnhancedMLProcessor = () => {
                         <img
                           src={item.preview}
                           alt={item.file.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-105"
                         />
                       </div>
                       
@@ -584,7 +587,7 @@ const EnhancedMLProcessor = () => {
       </div>
 
       {/* ML Configuration */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
@@ -600,7 +603,7 @@ const EnhancedMLProcessor = () => {
                 <select 
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value as 'roboflow' | 'yolo')}
-                  className="w-full p-2 border rounded-md"
+                  className="w-full p-2 border rounded-md hover:shadow"
                 >
                   <option value="roboflow">Roboflow API</option>
                   <option value="yolo">Local YOLOv8</option>
@@ -615,6 +618,7 @@ const EnhancedMLProcessor = () => {
                   max="20"
                   value={mlConfig.batchSize}
                   onChange={(e) => handleConfigChange('batchSize', parseInt(e.target.value))}
+                  className="hover:shadow"
                 />
               </div>
             </div>
@@ -643,6 +647,7 @@ const EnhancedMLProcessor = () => {
                   max="100"
                   value={mlConfig.minDetectionSize}
                   onChange={(e) => handleConfigChange('minDetectionSize', parseInt(e.target.value))}
+                  className="hover:shadow"
                 />
               </div>
             </div>
@@ -656,20 +661,21 @@ const EnhancedMLProcessor = () => {
               max="100"
               value={mlConfig.maxDetectionsPerImage}
               onChange={(e) => handleConfigChange('maxDetectionsPerImage', parseInt(e.target.value))}
+              className="hover:shadow"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Job Queue */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Processing Queue</CardTitle>
               <CardDescription>Current jobs and their status</CardDescription>
             </div>
-            <Button variant="outline" onClick={retryFailedJobs} size="sm">
+            <Button variant="outline" onClick={retryFailedJobs} size="sm" className="hover:shadow">
               <RefreshCw className="h-4 w-4 mr-2" />
               Retry Failed
             </Button>
@@ -683,7 +689,7 @@ const EnhancedMLProcessor = () => {
           ) : (
             <div className="space-y-3">
               {jobs.map((job) => (
-                <div key={job.id} className="border rounded-lg p-4">
+                <div key={job.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">Job {job.imageId.slice(-6)}</span>

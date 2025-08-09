@@ -114,29 +114,33 @@ const UploadsManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">User Uploads</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">User Uploads</h1>
         <div className="flex space-x-2">
           <Button 
             variant={filter === "all" ? "default" : "outline"} 
             onClick={() => setFilter("all")}
+            className="transition-all hover:shadow"
           >
             All
           </Button>
           <Button 
             variant={filter === "pending" ? "default" : "outline"}
             onClick={() => setFilter("pending")}
+            className="transition-all hover:shadow"
           >
             Pending
           </Button>
           <Button 
             variant={filter === "processing" ? "default" : "outline"}
             onClick={() => setFilter("processing")}
+            className="transition-all hover:shadow"
           >
             Processing
           </Button>
           <Button 
             variant={filter === "completed" ? "default" : "outline"}
             onClick={() => setFilter("completed")}
+            className="transition-all hover:shadow"
           >
             Completed
           </Button>
@@ -151,7 +155,7 @@ const UploadsManagement = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : filteredUploads.length === 0 ? (
-            <Card className="text-center p-6">
+            <Card className="text-center p-6 border-0 shadow-sm">
               <CardContent className="pt-6">
                 <p className="text-muted-foreground">No {filter} uploads available</p>
               </CardContent>
@@ -161,8 +165,8 @@ const UploadsManagement = () => {
               {filteredUploads.map((upload) => (
                 <Card 
                   key={upload.image_id} 
-                  className={`overflow-hidden cursor-pointer transition-all border-2 ${
-                    selectedUpload?.image_id === upload.image_id ? "border-primary" : "border-border"
+                  className={`overflow-hidden cursor-pointer transition-all border-0 shadow-sm hover:shadow-md hover:-translate-y-0.5 rounded-xl ${
+                    selectedUpload?.image_id === upload.image_id ? "ring-2 ring-primary" : ""
                   }`}
                   onClick={() => setSelectedUpload(upload)}
                 >
@@ -170,7 +174,7 @@ const UploadsManagement = () => {
                     <img
                       src={upload.image_url}
                       alt="Uploaded waste"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-105"
                       onError={(e) => {
                         e.currentTarget.src = '/placeholder.svg';
                       }}
@@ -198,9 +202,9 @@ const UploadsManagement = () => {
         {/* Upload Details */}
         <div>
           {selectedUpload ? (
-            <Card>
+            <Card className="border-0 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg">Upload Details</CardTitle>
+                <CardTitle className="text-lg bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Upload Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <img
@@ -260,7 +264,7 @@ const UploadsManagement = () => {
                         </div>
                       )}
                       <Link to={`/admin/analysis/${selectedUpload.image_id}`}>
-                        <Button variant="outline" className="mt-2 text-xs" size="sm">
+                        <Button variant="outline" className="mt-2 text-xs hover:shadow" size="sm">
                           View Full Analysis
                         </Button>
                       </Link>
@@ -274,7 +278,7 @@ const UploadsManagement = () => {
                         <Button 
                           onClick={() => handleStartAnalysis(selectedUpload)}
                           disabled={processingUpload === selectedUpload.image_id}
-                          className="w-full button-gradient"
+                          className="w-full button-gradient hover:shadow"
                         >
                           {processingUpload === selectedUpload.image_id ? (
                             <>
@@ -299,7 +303,7 @@ const UploadsManagement = () => {
               </CardContent>
             </Card>
           ) : (
-            <Card>
+            <Card className="border-0 shadow-sm">
               <CardContent className="p-6 text-center">
                 <p className="text-muted-foreground">
                   Select an upload to view details
