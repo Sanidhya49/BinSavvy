@@ -35,10 +35,8 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="bg-gradient-to-r from-binsavvy-500 to-waste-600 w-8 h-8 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold">BS</span>
-            </div>
+          <Link to="/" className="flex items-center space-x-2 group">
+            <img src="/binsavvy_logo.png" alt="BinSavvy" className="h-8 w-auto transition-transform group-hover:scale-[1.03]" />
             <span className="font-bold text-xl hidden md:block">BinSavvy</span>
           </Link>
         </div>
