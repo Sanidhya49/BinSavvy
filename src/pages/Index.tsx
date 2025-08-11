@@ -92,16 +92,14 @@ const Index = () => {
         </div>
         {/* decorative gradient underline */}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-green-400/50 via-emerald-400/40 to-blue-400/50" />
-        {/* decorative gradient underline */}
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-green-400/50 via-emerald-400/40 to-blue-400/50" />
       </header>
       {/* spacer for fixed header height */}
       <div className="h-16" />
 
       {/* Hero Section */}
-      <section className="relative py-20 px-6 md:px-10 reveal">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="relative px-6 md:px-10 reveal min-h-[calc(100vh-4rem)] flex items-center py-6 md:py-8 lg:py-10">
+        <div className="max-w-7xl mx-auto w-full lg:-translate-y-2 xl:-translate-y-3 transition-transform">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             <div className="space-y-8">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
@@ -153,8 +151,8 @@ const Index = () => {
             </div>
             
             <div className="relative">
-              <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-4 sm:p-6 border overflow-hidden flex items-center justify-center mt-6 lg:mt-2 ring-1 ring-black/5">
-                <img src="/binsavvy_logo.png" alt="Waste Detection" className="w-[500px] max-w-full h-auto transform -scale-x-100 translate-y-1 sm:translate-y-2" />
+              <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-4 sm:p-6 border overflow-hidden flex items-center justify-center ring-1 ring-black/5">
+                <img src="/binsavvy_logo.png" alt="Waste Detection" className="w-full h-auto max-w-[340px] md:max-w-[400px] object-contain transform -scale-x-100" />
               </div>
               <div className="absolute -top-4 -right-4 w-72 h-72 bg-gradient-to-br from-green-400 to-blue-400 rounded-full opacity-20 blur-3xl"></div>
             </div>
