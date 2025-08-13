@@ -19,6 +19,7 @@ A comprehensive web platform for smart waste analysis using AI and machine learn
 - **System Monitoring**: Real-time health checks for all services
 - **Analytics Dashboard**: Comprehensive waste analytics and insights
 - **Enhanced ML Processor**: Batch processing and job management
+- **Government-grade Reporting**: Cluster uploads into geographic zones, compute a priority score, and export reports in human-friendly formats (JSON, CSV, Excel, Word, Text, GeoJSON) with live map links.
 
 ## 🛠️ Tech Stack
 
@@ -39,7 +40,7 @@ A comprehensive web platform for smart waste analysis using AI and machine learn
 - **YOLOv8** for ML model integration
 
 ### ML & AI:
-- **Roboflow API** for cloud-based waste detection
+- **Roboflow API** for cloud-based waste detection (default model `garbage-det-t1lur/1`)
 - **Ultralytics YOLOv8** for local object detection
 - **OpenCV** for image processing
 - **NumPy** for numerical operations
@@ -110,6 +111,8 @@ CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 ROBOFLOW_API_KEY=your-roboflow-api-key
+# Optional: override the default Roboflow model (defaults to garbage-det-t1lur/1)
+ROBOFLOW_MODEL_ID=garbage-det-t1lur/1
 ```
 
 #### Cloudinary Setup
@@ -121,6 +124,7 @@ ROBOFLOW_API_KEY=your-roboflow-api-key
 1. Create account at [Roboflow](https://roboflow.com/)
 2. Get your API key
 3. Update the `.env` file with your API key
+4. (Optional) Set `ROBOFLOW_MODEL_ID` to switch models without code changes
 
 #### Database Setup
 ```bash
@@ -143,12 +147,36 @@ The backend will be available at `http://localhost:8000`
 npm install
 ```
 
+If you pulled updates, make sure the following new libs are installed for Excel/Word export:
+
+```bash
+npm install xlsx docx
+```
+
 #### Start Development Server
 ```bash
 npm run dev
 ```
 
 The frontend will be available at `http://localhost:8080`
+
+## 🧭 Government Reporting (Zones)
+
+The analytics page provides a zones-based report designed for municipal action:
+
+- **Zone clustering**: Nearby uploads are grouped into zones by a selectable radius (250 m, 500 m, 1 km).
+- **Per-zone metrics**:
+  - GPS center, radius, bounding box
+  - Total detections and average confidence (density proxy)
+  - **Priority score**: weighted by detections (0.6), confidence (0.3), and number of uploads (0.1)
+  - Representative address (optional)
+  - Quick map links (Google Maps & OpenStreetMap)
+- **Exports**:
+  - JSON, CSV, Text (human-friendly)
+  - Excel (.xlsx) and Word (.docx) with formatted tables
+  - GeoJSON for GIS tools
+
+To export: Open Admin → Analytics → choose Time Range, Format, Zone Size, Include Addresses → Export Report.
 
 ## 🔐 Demo Accounts
 
@@ -212,6 +240,7 @@ npm run dev
 - **ML Configuration Panel**: Model settings and thresholds
 - **Government Dashboard**: Waste report viewing system
 - **Analytics Dashboard**: Comprehensive waste analytics
+- **Zones Reporting**: Priority scoring, GeoJSON/Excel/Word/CSV/TXT export, and map links
 - **Enhanced ML Processor**: Batch processing and job management
 - **JWT Authentication**: Token-based authentication (demo mode)
 - **Real-time Updates**: Auto-refresh and focus-based updates

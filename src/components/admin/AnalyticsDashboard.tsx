@@ -52,7 +52,7 @@ const AnalyticsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('7d');
   const [exporting, setExporting] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xlsx' | 'docx' | 'txt'>('json');
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xlsx' | 'docx' | 'txt' | 'geojson'>('json');
   const [zoneSizeMeters, setZoneSizeMeters] = useState<number>(500);
   const [includeAddresses, setIncludeAddresses] = useState<boolean>(true);
   const [filteredUploads, setFilteredUploads] = useState<ImageUpload[]>([]);
@@ -135,6 +135,10 @@ const AnalyticsDashboard = () => {
         const csv = buildZonesCSV(report);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
         saveBlob(blob, `binsavvy-zones-report-${timeRange}-${zoneSizeMeters}m.csv`);
+      } else if (exportFormat === 'geojson') {
+        const geo = buildGeoJSON(report);
+        const blob = new Blob([JSON.stringify(geo, null, 2)], { type: 'application/geo+json' });
+        saveBlob(blob, `binsavvy-zones-report-${timeRange}-${zoneSizeMeters}m.geojson`);
       } else if (exportFormat === 'txt') {
         const txt = buildZonesTXT(report);
         const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
@@ -206,6 +210,7 @@ const AnalyticsDashboard = () => {
               <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
               <SelectItem value="docx">Word (.docx)</SelectItem>
               <SelectItem value="txt">Text (.txt)</SelectItem>
+              <SelectItem value="geojson">GeoJSON</SelectItem>
             </SelectContent>
           </Select>
           <Select value={String(zoneSizeMeters)} onValueChange={(v) => setZoneSizeMeters(Number(v))}>
@@ -548,8 +553,10 @@ type ZoneReport = {
   radiusMeters: number;
   detections: number;
   averageConfidence: number;
+  priorityScore: number;
   boundingBox: { minLat: number; maxLat: number; minLng: number; maxLng: number };
   representativeAddress?: string;
+  mapLinks: { googleMaps: string; openStreetMap: string };
   uploads: Array<{
     image_id: string;
     image_url: string;
@@ -638,19 +645,25 @@ async function buildZonesReport(
       address: includeAddresses ? (m.location || undefined) : undefined,
     }));
 
+    const priorityScore = computePriorityScore(detections, avgConf, c.members.length);
+    const googleMaps = `https://www.google.com/maps/search/?api=1&query=${c.centerLat},${c.centerLng}`;
+    const openStreetMap = `https://www.openstreetmap.org/?mlat=${c.centerLat}&mlon=${c.centerLng}#map=17/${c.centerLat}/${c.centerLng}`;
+
     return {
       zoneId: `zone-${idx + 1}`,
       center: { latitude: c.centerLat, longitude: c.centerLng },
       radiusMeters: zoneSizeMeters,
       detections,
       averageConfidence: Number((avgConf).toFixed(3)),
+      priorityScore,
       boundingBox: bbox,
       representativeAddress: includeAddresses ? uploadsOut[0]?.address : undefined,
+      mapLinks: { googleMaps, openStreetMap },
       uploads: uploadsOut,
     };
   });
 
-  return zones.sort((a, b) => b.detections - a.detections);
+  return zones.sort((a, b) => b.priorityScore - a.priorityScore);
 }
 
 // ---------- Export helpers ----------
@@ -665,7 +678,7 @@ function saveBlob(blob: Blob, filename: string) {
 
 function buildZonesCSV(report: { meta: any; zones: ZoneReport[] }) {
   const headers = [
-    'zoneId','center_lat','center_lng','radius_m','detections','avg_confidence','bbox_minLat','bbox_maxLat','bbox_minLng','bbox_maxLng','representativeAddress'
+    'zoneId','center_lat','center_lng','radius_m','detections','avg_confidence','priority_score','bbox_minLat','bbox_maxLat','bbox_minLng','bbox_maxLng','representativeAddress','googleMaps','openStreetMap'
   ];
   const rows = [headers.join(',')];
   for (const z of report.zones) {
@@ -676,11 +689,14 @@ function buildZonesCSV(report: { meta: any; zones: ZoneReport[] }) {
       z.radiusMeters,
       z.detections,
       z.averageConfidence,
+      z.priorityScore,
       z.boundingBox.minLat,
       z.boundingBox.maxLat,
       z.boundingBox.minLng,
       z.boundingBox.maxLng,
-      (z.representativeAddress ?? '').toString().replace(/,/g,';')
+      (z.representativeAddress ?? '').toString().replace(/,/g,';'),
+      z.mapLinks.googleMaps,
+      z.mapLinks.openStreetMap
     ].join(','));
   }
   rows.push('');
@@ -715,8 +731,9 @@ function buildZonesTXT(report: { meta: any; zones: ZoneReport[] }) {
   for (const z of report.zones) {
     lines.push(`== ${z.zoneId} ==`);
     lines.push(`Center: (${z.center.latitude.toFixed(6)}, ${z.center.longitude.toFixed(6)}) | Radius: ${z.radiusMeters} m`);
-    lines.push(`Detections: ${z.detections} | Avg Confidence: ${(z.averageConfidence*100).toFixed(1)}%`);
+    lines.push(`Detections: ${z.detections} | Avg Confidence: ${(z.averageConfidence*100).toFixed(1)}% | Priority: ${z.priorityScore.toFixed(2)}`);
     if (z.representativeAddress) lines.push(`Representative address: ${z.representativeAddress}`);
+    lines.push(`Map: ${z.mapLinks.googleMaps}`);
     lines.push('Uploads:');
     for (const u of z.uploads) {
       lines.push(`  - ${u.image_id} | ${u.uploaded_at} | (${u.latitude?.toFixed(6)}, ${u.longitude?.toFixed(6)}) | det: ${u.detections} | conf: ${u.average_confidence !== undefined ? (u.average_confidence*100).toFixed(1)+'%' : 'N/A'} | ${u.address ?? ''}`);
@@ -736,11 +753,14 @@ async function exportZonesXLSX(report: { meta: any; zones: ZoneReport[] }, filen
       Radius_m: z.radiusMeters,
       Detections: z.detections,
       Avg_Confidence: z.averageConfidence,
+      Priority: z.priorityScore,
       BBox_MinLat: z.boundingBox.minLat,
       BBox_MaxLat: z.boundingBox.maxLat,
       BBox_MinLng: z.boundingBox.minLng,
       BBox_MaxLng: z.boundingBox.maxLng,
-      Address: z.representativeAddress || ''
+      Address: z.representativeAddress || '',
+      Google_Maps: z.mapLinks.googleMaps,
+      OpenStreetMap: z.mapLinks.openStreetMap
     }));
 
     const uploadsTable = report.zones.flatMap(z =>
@@ -838,4 +858,35 @@ async function exportZonesDOCX(report: { meta: any; zones: ZoneReport[] }, filen
     const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
     saveBlob(blob, filename.replace('.docx', '.txt'));
   }
+}
+
+function computePriorityScore(totalDetections: number, averageConfidence: number, numUploads: number) {
+  // Weighted score: detections (0.6), confidence (0.3), number of uploads (0.1)
+  const normDet = Math.min(1, totalDetections / 20); // cap normalization at 20 detections
+  const normUploads = Math.min(1, numUploads / 10); // cap at 10 uploads
+  return Number(((normDet * 0.6) + (averageConfidence * 0.3) + (normUploads * 0.1)).toFixed(4));
+}
+
+function buildGeoJSON(report: { meta: any; zones: ZoneReport[] }) {
+  return {
+    type: 'FeatureCollection',
+    name: 'BinSavvy Zones',
+    features: report.zones.map((z) => ({
+      type: 'Feature',
+      properties: {
+        zoneId: z.zoneId,
+        radius_m: z.radiusMeters,
+        detections: z.detections,
+        average_confidence: z.averageConfidence,
+        priority_score: z.priorityScore,
+        address: z.representativeAddress || '',
+        googleMaps: z.mapLinks.googleMaps,
+        openStreetMap: z.mapLinks.openStreetMap,
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [z.center.longitude, z.center.latitude],
+      },
+    })),
+  } as const;
 }

@@ -379,6 +379,10 @@ backend/staticfiles/
 # Frontend
 src/.vscode/
 *.local
+*.xlsx
+*.docx
+*.csv
+*.geojson
 
 # Test files
 test_*.py
