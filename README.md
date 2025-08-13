@@ -280,7 +280,7 @@ npm run dev
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -292,4 +292,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email support@binsavvy.com or create an issue in this repository.
+For support, email sanidhyapatel99@gmail.com or create an issue in this repository.
