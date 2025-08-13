@@ -111,7 +111,7 @@ CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 ROBOFLOW_API_KEY=your-roboflow-api-key
-# Optional: override the default Roboflow model (defaults to garbage-det-t1lur/1)
+# Optional: override the default Roboflow model
 ROBOFLOW_MODEL_ID=garbage-det-t1lur/1
 ```
 
