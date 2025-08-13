@@ -77,12 +77,10 @@ const LoginForm = ({ onToggleForm }: LoginFormProps) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Login to BinSavvy</CardTitle>
-        <CardDescription className="text-center">
-          Enter your credentials to access your account
-        </CardDescription>
+    <Card className="w-full max-w-md mx-auto border-0 shadow-xl ring-1 ring-black/5">
+      <CardHeader className="space-y-1 text-center">
+        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+        <CardDescription>Enter your credentials to continue</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -100,7 +98,7 @@ const LoginForm = ({ onToggleForm }: LoginFormProps) => {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <a href="#" className="text-sm text-binsavvy-600 hover:underline">
+              <a href="#" className="text-sm text-binsavvy-700 hover:underline">
                 Forgot password?
               </a>
             </div>
@@ -115,9 +113,7 @@ const LoginForm = ({ onToggleForm }: LoginFormProps) => {
           </div>
           
           <div className="pt-2 space-y-2">
-            <div className="text-sm text-center text-muted-foreground">
-              Quick Login Shortcuts
-            </div>
+            <div className="text-xs text-center text-muted-foreground tracking-wide uppercase">Quick login</div>
             <div className="grid grid-cols-2 gap-3">
               <Button 
                 type="button"
@@ -159,17 +155,6 @@ const LoginForm = ({ onToggleForm }: LoginFormProps) => {
             >
               Create an account
             </button>
-          </div>
-          
-          {/* Demo Instructions */}
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <h4 className="font-semibold text-blue-800 mb-2">Demo Instructions:</h4>
-            <ul className="text-xs text-blue-700 space-y-1">
-              <li>• <strong>Backend Required:</strong> Start Django server first</li>
-              <li>• <strong>Quick Login:</strong> Use "Login as Admin" or "Login as User" buttons</li>
-              <li>• <strong>Manual Login:</strong> Try username: "admin" or "user"</li>
-              <li>• <strong>Passwords:</strong> "admin123" for admin, "user123" for user</li>
-            </ul>
           </div>
         </CardFooter>
       </form>

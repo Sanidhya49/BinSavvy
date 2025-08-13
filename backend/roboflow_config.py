@@ -12,7 +12,8 @@ class RoboflowConfig:
     
     def __init__(self):
         self.api_key = os.getenv('ROBOFLOW_API_KEY')
-        self.model_id = "waste-detection-xkvwi/2"  # The model you referenced
+        # Allow overriding via env; default to the requested model
+        self.model_id = os.getenv('ROBOFLOW_MODEL_ID', "garbage-det-t1lur/1")
         self.api_url = "https://serverless.roboflow.com"
         
         if not self.api_key:
@@ -134,8 +135,8 @@ class RoboflowConfig:
                 "average_confidence": round(avg_confidence, 3),
                 "waste_types": waste_counts,
                 "detections": detections,
-                "model_used": "Roboflow Waste Detection v2",
-                "model_accuracy": "88.9% mAP"
+                "model_used": self.model_id,
+                "model_accuracy": ""
             }
             
             return analysis_results

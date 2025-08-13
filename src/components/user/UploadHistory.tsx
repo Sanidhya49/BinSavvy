@@ -261,7 +261,7 @@ export default function UploadHistory() {
                     <div className="flex items-center gap-2">
                       <BarChart3 className="h-3 w-3 text-green-600" />
                       <span className="text-xs text-green-600 font-medium">
-                        {upload.analysis_results.total_detections} items detected
+                        Item detected
                       </span>
                     </div>
                   )}
