@@ -14,8 +14,15 @@ import { apiClient } from "@/lib/api";
 const UploadForm = () => {
   const { user, refreshData } = useAuth();
   const navigate = useNavigate();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  type QueueItem = {
+    id: string;
+    file: File;
+    previewUrl: string;
+    progress: number | null;
+    status: 'queued' | 'uploading' | 'done' | 'failed';
+  };
+  const [items, setItems] = useState<QueueItem[]>([]);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [useGps, setUseGps] = useState(false);
@@ -24,23 +31,65 @@ const UploadForm = () => {
   const [cameraOpen, setCameraOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [mapOpen, setMapOpen] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapInitedRef = useRef<boolean>(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const fileList = e.target.files;
+    if (fileList && fileList.length > 0) {
+      const take = Array.from(fileList);
+      // process sequentially to keep UI responsive
+      const processAll = async () => {
+        const newItems: QueueItem[] = [];
+        for (const file of take) {
       if (!file.type.startsWith("image/")) {
         toast.error("Please select an image file");
-        return;
+        continue;
       }
       
       if (file.size > 10 * 1024 * 1024) { // 10MB limit
         toast.error("File size must be less than 10MB");
-        return;
+        continue;
       }
-      
-      setSelectedFile(file);
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
+
+      // Optional client-side compression for very large images
+      const maybeCompress = async (f: File): Promise<File> => {
+        if (f.size < 2 * 1024 * 1024) return f; // under 2MB keep as-is
+        try {
+          const img = new Image();
+          const objectUrl = URL.createObjectURL(f);
+          img.src = objectUrl;
+          await new Promise((res, rej) => { img.onload = () => res(null); img.onerror = rej; });
+          const canvas = document.createElement('canvas');
+          const maxDim = 1600;
+          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return f;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const blob: Blob | null = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.85));
+          URL.revokeObjectURL(objectUrl);
+          if (!blob) return f;
+          return new File([blob], f.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+        } catch {
+          return f;
+        }
+      };
+
+          const processed = await maybeCompress(file);
+          const fileUrl = URL.createObjectURL(processed);
+          newItems.push({ id: `${Date.now()}-${Math.random()}`, file: processed, previewUrl: fileUrl, progress: null, status: 'queued' });
+        }
+        setItems((prev) => [...prev, ...newItems]);
+        if (items.length === 0) setActiveIndex(0);
+        if ((latitude == null || longitude == null) && newItems[0]) {
+          tryExtractExifGps(newItems[0].file);
+        }
+      };
+      processAll();
     }
   };
 
@@ -116,12 +165,13 @@ const UploadForm = () => {
           return;
         }
         const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
-        setSelectedFile(file);
         const url = URL.createObjectURL(blob);
-        setPreviewUrl(url);
+        setItems((prev) => [...prev, { id: `${Date.now()}-${Math.random()}`, file, previewUrl: url, progress: null, status: 'queued' }]);
+        setActiveIndex(items.length);
         setCameraOpen(false);
         stopCamera();
         toast.success("Photo captured from camera");
+        if (latitude == null || longitude == null) tryExtractExifGps(file);
       },
       "image/jpeg",
       0.92
@@ -132,6 +182,84 @@ const UploadForm = () => {
     return () => stopCamera();
   }, []);
 
+  // Initialize Leaflet from CDN when opening map (fallbacks gracefully)
+  useEffect(() => {
+    if (!mapOpen) return;
+    const ensureLeaflet = async () => {
+      try {
+        // Load CSS
+        if (!document.getElementById('leaflet-css')) {
+          const link = document.createElement('link');
+          link.id = 'leaflet-css';
+          link.rel = 'stylesheet';
+          link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+          document.head.appendChild(link);
+        }
+        if (!(window as any).L) {
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Leaflet load failed'));
+            document.body.appendChild(script);
+          });
+        }
+        const L = (window as any).L;
+        if (!L || !mapContainerRef.current || mapInitedRef.current) return;
+        mapInitedRef.current = true;
+        const center = [latitude ?? 26.9124, longitude ?? 75.7873]; // Jaipur default
+        const map = L.map(mapContainerRef.current).setView(center, 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(map);
+        let marker: any = null;
+        const setPoint = (latlng: any) => {
+          if (marker) marker.remove();
+          marker = L.marker(latlng).addTo(map);
+          setLatitude(Number(latlng.lat));
+          setLongitude(Number(latlng.lng));
+          setUseGps(true);
+        };
+        map.on('click', (e: any) => setPoint(e.latlng));
+        if (latitude && longitude) setPoint({ lat: latitude, lng: longitude });
+      } catch (e) {
+        console.warn('Map picker unavailable:', e);
+      }
+    };
+    ensureLeaflet();
+  }, [mapOpen]);
+
+  const transformActive = async (action: 'rotate' | 'flip') => {
+    const current = items[activeIndex];
+    if (!current) return;
+    const img = new Image();
+    img.src = current.previewUrl;
+    await new Promise((res, rej) => { img.onload = () => res(null); img.onerror = rej; });
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    if (action === 'rotate') {
+      canvas.width = img.height;
+      canvas.height = img.width;
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(Math.PI / 2);
+      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+    } else {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(img, 0, 0);
+    }
+    const blob: Blob | null = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.92));
+    if (!blob) return;
+    const file = new File([blob], current.file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+    const url = URL.createObjectURL(blob);
+    setItems((prev) => prev.map((it, idx) => idx === activeIndex ? { ...it, file, previewUrl: url } : it));
+  };
+
   const handleAddressChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAddress(e.target.value);
   };
@@ -139,8 +267,8 @@ const UploadForm = () => {
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedFile) {
-      toast.error("Please select an image to upload");
+    if (items.length === 0) {
+      toast.error("Please add at least one image to upload");
       return;
     }
     
@@ -151,46 +279,138 @@ const UploadForm = () => {
     
     try {
       setLoading(true);
-      
-      console.log('Uploading image with location:', address.trim() || "GPS Location");
-      
-      // Use the backend API to upload the image
-      const response = await apiClient.uploadImage(
-        selectedFile,
-        address.trim() || "GPS Location",
-        latitude,
-        longitude,
-        false // Enable automatic ML processing
-      );
-      
-      console.log('Upload response:', response);
-      
-      if (response.success) {
-        toast.success("Image uploaded successfully!");
-        
-        // Trigger global data refresh
-        refreshData();
-        
-        // Clear form
-        setSelectedFile(null);
-        setPreviewUrl(null);
-        setAddress("");
-        setLatitude(null);
-        setLongitude(null);
-        setUseGps(false);
-        
-        // Navigate to history page after a short delay to ensure backend processes the image
-        setTimeout(() => {
-          navigate("/history");
-        }, 1000);
-      } else {
-        toast.error(response.error || "Failed to upload image");
+      console.log('Uploading images with location:', address.trim() || "GPS Location");
+
+      // Upload sequentially for stable progress UI
+      for (let i = 0; i < items.length; i++) {
+        setItems((prev) => prev.map((it, idx) => idx === i ? { ...it, status: 'uploading', progress: 0 } : it));
+        const current = items[i];
+        const response = await apiClient.uploadImage(
+          current.file,
+          address.trim() || "GPS Location",
+          latitude ?? undefined,
+          longitude ?? undefined,
+          false,
+          (p) => {
+            setUploadProgress(p);
+            setItems((prev) => prev.map((it, idx) => idx === i ? { ...it, progress: p } : it));
+          }
+        );
+        if (response.success) {
+          setItems((prev) => prev.map((it, idx) => idx === i ? { ...it, status: 'done', progress: 100 } : it));
+        } else {
+          setItems((prev) => prev.map((it, idx) => idx === i ? { ...it, status: 'failed' } : it));
+          // Queue offline if network issue
+          if (!navigator.onLine || (response.error && response.error.includes('Failed to fetch'))) {
+            await queueOffline(current.file, address.trim() || "GPS Location", latitude ?? undefined, longitude ?? undefined);
+            toast.message("Saved offline", { description: "We will retry when you're back online." });
+          } else {
+            toast.error(response.error || "Failed to upload image");
+          }
+        }
       }
+
+      // Trigger global data refresh
+      refreshData();
+
+      // Reset state and go to history
+      setItems([]);
+      setAddress("");
+      setLatitude(null);
+      setLongitude(null);
+      setUseGps(false);
+      setTimeout(() => navigate("/history"), 700);
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload image. Please try again.");
     } finally {
       setLoading(false);
+      setUploadProgress(null);
+    }
+  };
+
+  // --- Offline queue using localStorage (data URL) ---
+  const OFFLINE_KEY = 'binsavvy_offline_queue_v1';
+  const fileToDataUrl = (file: File): Promise<string> => new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(String(reader.result));
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+  const dataUrlToFile = async (dataUrl: string, filename: string): Promise<File> => {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    return new File([blob], filename, { type: blob.type || 'image/jpeg' });
+  };
+  const queueOffline = async (file: File, loc: string, lat?: number, lng?: number) => {
+    try {
+      const encoded = await fileToDataUrl(file);
+      const entry = { filename: file.name, dataUrl: encoded, loc, lat, lng, ts: Date.now() };
+      const arr = JSON.parse(localStorage.getItem(OFFLINE_KEY) || '[]');
+      arr.push(entry);
+      localStorage.setItem(OFFLINE_KEY, JSON.stringify(arr));
+    } catch (e) {
+      console.warn('Failed saving offline upload', e);
+    }
+  };
+  const retryOffline = async () => {
+    const raw = localStorage.getItem(OFFLINE_KEY);
+    if (!raw) return;
+    const arr: Array<{ filename: string; dataUrl: string; loc: string; lat?: number; lng?: number; ts: number }> = JSON.parse(raw);
+    if (arr.length === 0) return;
+    for (const entry of arr) {
+      const f = await dataUrlToFile(entry.dataUrl, entry.filename || `offline-${entry.ts}.jpg`);
+      const res = await apiClient.uploadImage(f, entry.loc, entry.lat, entry.lng, false);
+      if (!res.success) {
+        toast.error('Offline upload retry failed. Will keep for later.');
+        return; // stop to avoid loop
+      }
+    }
+    localStorage.removeItem(OFFLINE_KEY);
+    toast.success('Pending offline uploads have been sent.');
+  };
+  useEffect(() => {
+    const onOnline = () => { if (navigator.onLine) retryOffline(); };
+    window.addEventListener('online', onOnline);
+    if (navigator.onLine) { retryOffline(); }
+    return () => window.removeEventListener('online', onOnline);
+  }, []);
+
+  // --- EXIF GPS extraction (optional via CDN) ---
+  const ensureExifr = async (): Promise<any | null> => {
+    const w = window as any;
+    if (w.exifr) return w.exifr;
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const existing = document.getElementById('exifr-umd');
+        if (existing) { resolve(); return; }
+        const script = document.createElement('script');
+        script.id = 'exifr-umd';
+        script.src = 'https://unpkg.com/exifr/dist/full.umd.js';
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('exifr load failed'));
+        document.body.appendChild(script);
+      });
+      return w.exifr || null;
+    } catch {
+      return null;
+    }
+  };
+
+  const tryExtractExifGps = async (file: File) => {
+    try {
+      const exifr: any = await ensureExifr();
+      if (!exifr) return;
+      const output: any = await exifr.gps(file).catch(() => null);
+      if (output && typeof output.latitude === 'number' && typeof output.longitude === 'number') {
+        setLatitude(output.latitude);
+        setLongitude(output.longitude);
+        setUseGps(true);
+        toast.success('GPS auto-filled from photo metadata');
+      }
+    } catch {
+      // ignore silently
     }
   };
 
@@ -209,11 +429,34 @@ const UploadForm = () => {
             <Label htmlFor="image-upload">Upload Image</Label>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <div className="border rounded-md p-2 hover:shadow-sm transition-shadow">
+                <div
+                  className="border rounded-md p-2 hover:shadow-sm transition-shadow"
+                  onDragOver={(e) => { e.preventDefault(); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const f = e.dataTransfer.files?.[0];
+                    if (f) {
+                      const fakeEvent = { target: { files: [f] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+                      handleFileChange(fakeEvent);
+                    }
+                  }}
+                  onPaste={(e) => {
+                    const item = Array.from(e.clipboardData.items).find((i) => i.type.startsWith('image/'));
+                    if (item) {
+                      const blob = item.getAsFile();
+                      if (blob) {
+                        const file = new File([blob], 'pasted-image.png', { type: blob.type });
+                        const fakeEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+                        handleFileChange(fakeEvent);
+                      }
+                    }
+                  }}
+                >
                   <Input
                     id="image-upload"
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleFileChange}
                     className="cursor-pointer"
                     {...({ capture: "environment" } as any)}
@@ -229,16 +472,19 @@ const UploadForm = () => {
                 </p>
               </div>
               <div className="flex items-center justify-center border rounded-md p-2 min-h-[150px] bg-muted/30">
-                {previewUrl ? (
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    className="max-h-[200px] max-w-full object-contain rounded"
-                  />
+                {items.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-2 w-full">
+                    {items.map((it, idx) => (
+                      <button type="button" key={it.id} className={`relative rounded overflow-hidden border ${idx===activeIndex?'ring-2 ring-primary':''}`} onClick={() => setActiveIndex(idx)}>
+                        <img src={it.previewUrl} alt="Preview" className="h-24 w-full object-cover" />
+                        {it.status !== 'queued' && (
+                          <span className="absolute bottom-0 left-0 right-0 text-[10px] bg-black/50 text-white px-1">{it.status}{it.progress!==null?` ${it.progress}%`:''}</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Image preview will appear here
-                  </p>
+                  <p className="text-sm text-muted-foreground">Drag & drop, paste, capture, or choose a file</p>
                 )}
               </div>
             </div>
@@ -266,6 +512,20 @@ const UploadForm = () => {
               rows={3}
               disabled={loading}
             />
+            <div className="grid grid-cols-2 gap-2">
+              <Input type="number" step="0.000001" placeholder="Latitude" value={latitude ?? ''} onChange={(e)=> setLatitude(e.target.value? Number(e.target.value): null)} />
+              <Input type="number" step="0.000001" placeholder="Longitude" value={longitude ?? ''} onChange={(e)=> setLongitude(e.target.value? Number(e.target.value): null)} />
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setMapOpen(true)} className="text-xs hover:shadow">Pick on Map</Button>
+              {items[activeIndex] && (
+                <>
+                  <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => transformActive('rotate')}>Rotate 90°</Button>
+                  <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => transformActive('flip')}>Flip</Button>
+                  <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => tryExtractExifGps(items[activeIndex].file)}>Auto GPS from EXIF</Button>
+                </>
+              )}
+            </div>
             {useGps && latitude !== null && (
               <div className="text-xs text-muted-foreground">
                 GPS Coordinates: {latitude.toFixed(6)}, {longitude?.toFixed(6)}
@@ -277,15 +537,15 @@ const UploadForm = () => {
           <Button
             type="submit"
             className="w-full button-gradient"
-            disabled={loading || !selectedFile}
+            disabled={loading || items.length===0}
           >
             {loading ? (
               <>
                 <span className="animate-spin mr-2">○</span>
-                Uploading...
+                {uploadProgress !== null ? `Uploading ${uploadProgress}%` : "Uploading..."}
               </>
             ) : (
-              "Upload Image"
+              items.length > 1 ? `Upload ${items.length} Images` : "Upload Image"
             )}
           </Button>
         </CardFooter>
@@ -306,6 +566,17 @@ const UploadForm = () => {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={mapOpen} onOpenChange={(o)=> setMapOpen(o)}>
+        <DialogContent className="sm:max-w-[760px]">
+          <DialogHeader>
+            <DialogTitle>Select Location</DialogTitle>
+            <DialogDescription>Click on the map to set latitude/longitude.</DialogDescription>
+          </DialogHeader>
+          <div className="h-[420px] w-full rounded-md overflow-hidden" ref={mapContainerRef} />
+          <div className="text-xs text-muted-foreground">Jaipur set as default view if GPS not available.</div>
         </DialogContent>
       </Dialog>
     </Card>
