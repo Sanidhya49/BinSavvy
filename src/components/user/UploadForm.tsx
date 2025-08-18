@@ -23,6 +23,8 @@ const UploadForm = () => {
   };
   const [items, setItems] = useState<QueueItem[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  type LogEntry = { id: string; message: string; ts: number };
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [useGps, setUseGps] = useState(false);
@@ -36,6 +38,13 @@ const UploadForm = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInitedRef = useRef<boolean>(false);
 
+  // Queue limits
+  const MAX_QUEUE_ITEMS = 10;
+  const MAX_TOTAL_MB = 40; // max combined size
+  const bytesLimit = MAX_TOTAL_MB * 1024 * 1024;
+  const queueTotalBytes = (arr: QueueItem[]) => arr.reduce((acc, it) => acc + it.file.size, 0);
+  const addLog = (message: string) => setLogs((prev) => [{ id: `${Date.now()}-${Math.random()}`, message, ts: Date.now() }, ...prev].slice(0, 8));
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (fileList && fileList.length > 0) {
@@ -44,13 +53,20 @@ const UploadForm = () => {
       const processAll = async () => {
         const newItems: QueueItem[] = [];
         for (const file of take) {
+          if (items.length + newItems.length >= MAX_QUEUE_ITEMS) {
+            toast.error(`Queue limit reached (${MAX_QUEUE_ITEMS}).`);
+            addLog(`Skipped extra file: queue limit ${MAX_QUEUE_ITEMS}`);
+            break;
+          }
       if (!file.type.startsWith("image/")) {
         toast.error("Please select an image file");
+        addLog("Rejected non-image file");
         continue;
       }
       
       if (file.size > 10 * 1024 * 1024) { // 10MB limit
         toast.error("File size must be less than 10MB");
+        addLog("Rejected file >10MB");
         continue;
       }
 
@@ -80,8 +96,16 @@ const UploadForm = () => {
       };
 
           const processed = await maybeCompress(file);
+          const wouldBe = [...items, ...newItems];
+          const projectedBytes = queueTotalBytes(wouldBe) + processed.size;
+          if (projectedBytes > bytesLimit) {
+            toast.error(`Queue total exceeds ${MAX_TOTAL_MB} MB. Skipping.`);
+            addLog(`Skipped ${file.name}: total size limit ${MAX_TOTAL_MB}MB`);
+            continue;
+          }
           const fileUrl = URL.createObjectURL(processed);
           newItems.push({ id: `${Date.now()}-${Math.random()}`, file: processed, previewUrl: fileUrl, progress: null, status: 'queued' });
+          addLog(`Added ${processed.name} (${(processed.size/1024/1024).toFixed(1)}MB)`);
         }
         setItems((prev) => [...prev, ...newItems]);
         if (items.length === 0) setActiveIndex(0);
@@ -172,6 +196,7 @@ const UploadForm = () => {
         stopCamera();
         toast.success("Photo captured from camera");
         if (latitude == null || longitude == null) tryExtractExifGps(file);
+        addLog("Captured photo from camera");
       },
       "image/jpeg",
       0.92
@@ -284,6 +309,7 @@ const UploadForm = () => {
       // Upload sequentially for stable progress UI
       for (let i = 0; i < items.length; i++) {
         setItems((prev) => prev.map((it, idx) => idx === i ? { ...it, status: 'uploading', progress: 0 } : it));
+        addLog(`Uploading ${items[i].file.name}...`);
         const current = items[i];
         const response = await apiClient.uploadImage(
           current.file,
@@ -298,14 +324,17 @@ const UploadForm = () => {
         );
         if (response.success) {
           setItems((prev) => prev.map((it, idx) => idx === i ? { ...it, status: 'done', progress: 100 } : it));
+          addLog(`Uploaded ${items[i].file.name}`);
         } else {
           setItems((prev) => prev.map((it, idx) => idx === i ? { ...it, status: 'failed' } : it));
           // Queue offline if network issue
           if (!navigator.onLine || (response.error && response.error.includes('Failed to fetch'))) {
             await queueOffline(current.file, address.trim() || "GPS Location", latitude ?? undefined, longitude ?? undefined);
             toast.message("Saved offline", { description: "We will retry when you're back online." });
+            addLog(`Saved offline: ${items[i].file.name}`);
           } else {
             toast.error(response.error || "Failed to upload image");
+            addLog(`Failed upload: ${items[i].file.name}`);
           }
         }
       }
@@ -320,9 +349,11 @@ const UploadForm = () => {
       setLongitude(null);
       setUseGps(false);
       setTimeout(() => navigate("/history"), 700);
+      addLog("All uploads processed");
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload image. Please try again.");
+      addLog("Unexpected upload error");
     } finally {
       setLoading(false);
       setUploadProgress(null);
@@ -363,11 +394,13 @@ const UploadForm = () => {
       const res = await apiClient.uploadImage(f, entry.loc, entry.lat, entry.lng, false);
       if (!res.success) {
         toast.error('Offline upload retry failed. Will keep for later.');
+        addLog('Offline retry failed');
         return; // stop to avoid loop
       }
     }
     localStorage.removeItem(OFFLINE_KEY);
     toast.success('Pending offline uploads have been sent.');
+    addLog('Offline uploads sent');
   };
   useEffect(() => {
     const onOnline = () => { if (navigator.onLine) retryOffline(); };
@@ -475,12 +508,23 @@ const UploadForm = () => {
                 {items.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2 w-full">
                     {items.map((it, idx) => (
-                      <button type="button" key={it.id} className={`relative rounded overflow-hidden border ${idx===activeIndex?'ring-2 ring-primary':''}`} onClick={() => setActiveIndex(idx)}>
-                        <img src={it.previewUrl} alt="Preview" className="h-24 w-full object-cover" />
+                      <div key={it.id} className={`relative rounded overflow-hidden border group ${idx===activeIndex?'ring-2 ring-primary':''}`}>
+                        <button type="button" className="w-full" onClick={() => setActiveIndex(idx)}>
+                          <img src={it.previewUrl} alt="Preview" className="h-24 w-full object-cover" />
+                        </button>
                         {it.status !== 'queued' && (
                           <span className="absolute bottom-0 left-0 right-0 text-[10px] bg-black/50 text-white px-1">{it.status}{it.progress!==null?` ${it.progress}%`:''}</span>
                         )}
-                      </button>
+                        <button
+                          type="button"
+                          className="absolute top-1 right-1 bg-white/80 hover:bg-white text-xs rounded px-1 shadow hidden group-hover:block"
+                          onClick={() => {
+                            setItems((prev) => prev.filter((_, j) => j !== idx));
+                            if (activeIndex === idx) setActiveIndex(0);
+                            addLog(`Removed ${it.file.name} from queue`);
+                          }}
+                        >✕</button>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -503,6 +547,9 @@ const UploadForm = () => {
               >
                 {useGps && latitude !== null ? "GPS Location Captured" : "Use GPS"}
               </Button>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Queue: {items.length}/{MAX_QUEUE_ITEMS} · Total size: {((items.reduce((a,b)=>a+b.file.size,0))/1024/1024).toFixed(1)}MB / {MAX_TOTAL_MB}MB
             </div>
             <Textarea
               id="location"
@@ -550,6 +597,16 @@ const UploadForm = () => {
           </Button>
         </CardFooter>
       </form>
+      {logs.length > 0 && (
+        <div className="mt-4 text-xs text-muted-foreground">
+          <div className="font-medium mb-1">Activity</div>
+          <ul className="space-y-1 max-h-28 overflow-auto pr-1">
+            {logs.map((l) => (
+              <li key={l.id}>• {new Date(l.ts).toLocaleTimeString()} — {l.message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <Dialog open={cameraOpen} onOpenChange={(open) => { setCameraOpen(open); if (!open) stopCamera(); }}>
         <DialogContent className="sm:max-w-[720px]">
           <DialogHeader>
