@@ -111,7 +111,7 @@ CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 ROBOFLOW_API_KEY=your-roboflow-api-key
-# Optional: override the default Roboflow model (defaults to garbage-det-t1lur/1)
+# Optional: override the default Roboflow model
 ROBOFLOW_MODEL_ID=garbage-det-t1lur/1
 ```
 
@@ -280,7 +280,7 @@ npm run dev
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -292,4 +292,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email support@binsavvy.com or create an issue in this repository.
+For support, email sanidhyapatel99@gmail.com or create an issue in this repository.
