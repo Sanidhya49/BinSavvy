@@ -1,10 +1,11 @@
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,6 +21,9 @@ const UploadForm = () => {
   const [useGps, setUseGps] = useState(false);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -58,6 +62,75 @@ const UploadForm = () => {
       toast.error("Geolocation is not supported by this browser");
     }
   };
+
+  const stopCamera = () => {
+    try {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    } finally {
+      streamRef.current = null;
+      if (videoRef.current) {
+        // @ts-expect-error - MediaStream typing for srcObject
+        videoRef.current.srcObject = null;
+      }
+    }
+  };
+
+  const openCamera = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error("Camera is not supported on this device/browser");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        // @ts-expect-error - MediaStream typing for srcObject
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setCameraOpen(true);
+    } catch (err) {
+      console.error("Camera open failed:", err);
+      toast.error("Unable to access camera. Please check permissions.");
+    }
+  };
+
+  const captureFromCamera = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const width = video.videoWidth || 1280;
+    const height = video.videoHeight || 720;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, width, height);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          toast.error("Capture failed. Try again.");
+          return;
+        }
+        const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
+        setSelectedFile(file);
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
+        setCameraOpen(false);
+        stopCamera();
+        toast.success("Photo captured from camera");
+      },
+      "image/jpeg",
+      0.92
+    );
+  };
+
+  useEffect(() => {
+    return () => stopCamera();
+  }, []);
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAddress(e.target.value);
@@ -143,7 +216,13 @@ const UploadForm = () => {
                     accept="image/*"
                     onChange={handleFileChange}
                     className="cursor-pointer"
+                    {...({ capture: "environment" } as any)}
                   />
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={openCamera} className="text-xs hover:shadow">
+                    Use Camera
+                  </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Supported formats: JPEG, PNG, WebP. Max size: 10MB.
@@ -211,6 +290,24 @@ const UploadForm = () => {
           </Button>
         </CardFooter>
       </form>
+      <Dialog open={cameraOpen} onOpenChange={(open) => { setCameraOpen(open); if (!open) stopCamera(); }}>
+        <DialogContent className="sm:max-w-[720px]">
+          <DialogHeader>
+            <DialogTitle>Camera</DialogTitle>
+            <DialogDescription>Align the waste in frame and tap capture.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative bg-black rounded-md overflow-hidden aspect-video">
+              <video ref={videoRef} autoPlay playsInline className="w-full h-full object-contain" />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={captureFromCamera}>
+                Capture Photo
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
