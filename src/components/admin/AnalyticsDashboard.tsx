@@ -20,6 +20,7 @@ import { useState, useEffect, useMemo } from "react";
 import { apiClient } from "@/lib/api";
 import { ImageUpload } from "@/lib/api";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { Switch } from "@/components/ui/switch";
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, BarChart as RBarChart, Bar } from "recharts";
 
 interface AnalyticsData {
@@ -172,7 +173,7 @@ const AnalyticsDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center p-6 sm:p-8">
         <div className="flex items-center gap-3">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           <span>Loading analytics...</span>
@@ -182,15 +183,15 @@ const AnalyticsDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-5 sm:space-y-6 pb-16 sm:pb-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Analytics Dashboard</h1>
-          <p className="text-muted-foreground">Comprehensive insights into waste processing and analysis</p>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Analytics Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Comprehensive insights into waste processing and analysis</p>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center w-full sm:w-auto">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32 hover:shadow">
+            <SelectTrigger className="min-w-[110px] w-auto sm:w-32 hover:shadow">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -201,7 +202,7 @@ const AnalyticsDashboard = () => {
             </SelectContent>
           </Select>
           <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as any)}>
-            <SelectTrigger className="w-32 hover:shadow">
+            <SelectTrigger className="min-w-[120px] w-auto sm:w-32 hover:shadow">
               <SelectValue placeholder="Format" />
             </SelectTrigger>
             <SelectContent>
@@ -214,7 +215,7 @@ const AnalyticsDashboard = () => {
             </SelectContent>
           </Select>
           <Select value={String(zoneSizeMeters)} onValueChange={(v) => setZoneSizeMeters(Number(v))}>
-            <SelectTrigger className="w-36 hover:shadow">
+            <SelectTrigger className="min-w-[130px] w-auto sm:w-36 hover:shadow">
               <SelectValue placeholder="Zone size" />
             </SelectTrigger>
             <SelectContent>
@@ -223,11 +224,11 @@ const AnalyticsDashboard = () => {
               <SelectItem value="1000">Zone: 1 km</SelectItem>
             </SelectContent>
           </Select>
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <input type="checkbox" className="h-4 w-4" checked={includeAddresses} onChange={(e) => setIncludeAddresses(e.target.checked)} />
-            Include addresses
-          </label>
-          <Button onClick={exportAnalytics} disabled={exporting} className="hover:shadow">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground w-full sm:w-auto justify-between">
+            <Switch checked={includeAddresses} onCheckedChange={setIncludeAddresses} />
+            <span className="whitespace-nowrap">Include addresses</span>
+          </div>
+          <Button onClick={exportAnalytics} disabled={exporting} className="hover:shadow w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             {exporting ? 'Exporting...' : 'Export Report'}
           </Button>
@@ -235,7 +236,7 @@ const AnalyticsDashboard = () => {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Uploads</CardTitle>
@@ -404,24 +405,27 @@ const AnalyticsDashboard = () => {
           ) : (
             <div className="space-y-3">
               {analytics.recentActivity.map((upload) => (
-                <div key={upload.image_id} className="flex items-center justify-between p-3 border rounded-lg hover:shadow-sm transition-shadow">
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={upload.image_url} 
+                <div
+                  key={upload.image_id}
+                  className="p-3 border rounded-lg hover:shadow-sm transition-shadow sm:flex sm:items-center sm:justify-between"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img
+                      src={upload.image_url}
                       alt="Upload"
-                      className="w-12 h-12 object-cover rounded"
+                      className="w-12 h-12 object-cover rounded flex-shrink-0"
                     />
-                    <div>
-                      <p className="font-medium text-sm">{upload.location || 'No location'}</p>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{upload.location || 'No location'}</p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(upload.uploaded_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="mt-2 sm:mt-0 flex items-center gap-2 flex-wrap sm:flex-nowrap sm:shrink-0">
                     <StatusBadge status={upload.status} />
                     {upload.analysis_results && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-[10px] sm:text-xs">
                         {(upload.analysis_results as { total_detections?: number })?.total_detections || 0} detections
                       </Badge>
                     )}
@@ -432,6 +436,26 @@ const AnalyticsDashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Mobile Sticky Actions */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t p-3">
+        <div className="flex items-center gap-2">
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="min-w-[110px] w-auto hover:shadow">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="24h">24h</SelectItem>
+              <SelectItem value="7d">7d</SelectItem>
+              <SelectItem value="30d">30d</SelectItem>
+              <SelectItem value="all">All</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={exportAnalytics} disabled={exporting} className="shrink-0">
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

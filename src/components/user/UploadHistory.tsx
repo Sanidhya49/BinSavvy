@@ -170,7 +170,7 @@ export default function UploadHistory() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center p-6 sm:p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         <span className="ml-2">Loading upload history...</span>
       </div>
@@ -178,19 +178,19 @@ export default function UploadHistory() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 sm:p-6 space-y-5 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Upload History</h1>
-          <p className="text-gray-600">View and manage your waste image contributions</p>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Upload History</h1>
+          <p className="text-sm sm:text-base text-gray-600">View and manage your waste image contributions</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
             <span>Auto refresh</span>
             <input type="checkbox" className="h-4 w-4" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
           </div>
-          <Button onClick={fetchUploads} variant="outline" className="hover:shadow">
+          <Button onClick={fetchUploads} variant="outline" className="hover:shadow w-full sm:w-auto">
             Refresh
           </Button>
         </div>
@@ -220,7 +220,7 @@ export default function UploadHistory() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {uploads.map((upload) => (
             <Card key={upload.image_id} className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
               <div className="aspect-video relative">
@@ -290,7 +290,7 @@ export default function UploadHistory() {
                     variant="outline"
                     size="sm"
                     onClick={() => setSelectedImage(upload)}
-                    className="hover:shadow"
+                    className="hover:shadow w-full sm:w-auto"
                   >
                     <Eye className="h-3 w-3 mr-1" />
                     View Details
@@ -306,7 +306,7 @@ export default function UploadHistory() {
       {selectedImage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">Image Details</h2>
                 <Button
@@ -331,7 +331,7 @@ export default function UploadHistory() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
                     <strong>Location:</strong> {selectedImage.location || 'Unknown'}
                   </div>

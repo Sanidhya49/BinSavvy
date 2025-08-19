@@ -67,14 +67,14 @@ export default function UserDashboard() {
   }, []);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 sm:p-6 space-y-5 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Welcome to BinSavvy</h1>
-          <p className="text-gray-600">Upload and analyze waste images in your surroundings</p>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Welcome to BinSavvy</h1>
+          <p className="text-sm sm:text-base text-gray-600">Upload and analyze waste images in your surroundings</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <Badge variant="secondary">User Dashboard</Badge>
         </div>
       </div>
@@ -82,13 +82,13 @@ export default function UserDashboard() {
       {/* User Info */}
       <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
-          <CardTitle className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Welcome, {user?.username || 'User'}!</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Welcome, {user?.username || 'User'}!</CardTitle>
           <CardDescription>
             You are logged in as a {user?.role || 'user'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <strong>Username:</strong> {user?.username}
             </div>
@@ -106,7 +106,7 @@ export default function UserDashboard() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Uploads</CardTitle>
@@ -177,20 +177,20 @@ export default function UserDashboard() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" asChild className="hover:shadow">
+            <Button variant="outline" size="sm" asChild className="hover:shadow w-full sm:w-auto">
               <a href="/upload">
                 <Upload className="h-4 w-4 mr-2" />
                 Upload New Image
               </a>
             </Button>
-            <Button variant="outline" size="sm" asChild className="hover:shadow">
+            <Button variant="outline" size="sm" asChild className="hover:shadow w-full sm:w-auto">
               <a href="/history">
                 <Image className="h-4 w-4 mr-2" />
                 View All Images
               </a>
             </Button>
             
-            <Button variant="outline" size="sm" className="hover:shadow">
+            <Button variant="outline" size="sm" className="hover:shadow w-full sm:w-auto">
               <Settings className="h-4 w-4 mr-2" />
               Account Settings
             </Button>
@@ -208,7 +208,7 @@ export default function UserDashboard() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-8">
+            <div className="flex items-center justify-center py-6 sm:py-8">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
               <span className="ml-2">Loading recent uploads...</span>
             </div>
@@ -232,10 +232,10 @@ export default function UserDashboard() {
               <p className="text-sm">Start by uploading your first waste image</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {recentImages.map((image) => (
-                <div key={image.image_id} className="flex items-center space-x-4 p-3 border rounded-lg hover:shadow-sm transition-shadow">
-                  <div className="relative w-16 h-16 flex-shrink-0">
+                <div key={image.image_id} className="flex items-center gap-3 sm:gap-4 p-3 border rounded-lg hover:shadow-sm transition-shadow">
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0">
                     <img
                       src={image.image_url}
                       alt={`Waste image from ${image.location}`}
@@ -272,7 +272,7 @@ export default function UserDashboard() {
                     </div>
                   </div>
                   
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="ml-auto">
                     <a href={`/history`}>
                       <Image className="h-3 w-3" />
                     </a>
@@ -282,7 +282,7 @@ export default function UserDashboard() {
               
               {recentImages.length > 0 && (
                 <div className="text-center pt-2">
-                  <Button variant="outline" size="sm" asChild className="hover:shadow">
+                  <Button variant="outline" size="sm" asChild className="hover:shadow w-full sm:w-auto">
                     <a href="/history">
                       View All Images ({recentImages.length})
                     </a>

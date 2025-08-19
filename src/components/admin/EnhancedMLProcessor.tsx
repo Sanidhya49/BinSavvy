@@ -381,22 +381,22 @@ const EnhancedMLProcessor = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-5 sm:space-y-6 pb-16 sm:pb-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-fuchsia-600 bg-clip-text text-transparent">Enhanced ML Processor</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-fuchsia-600 bg-clip-text text-transparent">Enhanced ML Processor</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Advanced batch processing with performance tracking
             <span className="ml-2 text-xs text-muted-foreground">
               Last updated: {lastUpdate.toLocaleTimeString()}
             </span>
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button 
             variant="outline"
             onClick={() => setShowUploadSection(!showUploadSection)}
-            className="hover:shadow"
+            className="hover:shadow w-full sm:w-auto whitespace-nowrap"
           >
             <Upload className="h-4 w-4 mr-2" />
             {showUploadSection ? 'Hide Upload' : 'Add Images'}
@@ -404,7 +404,7 @@ const EnhancedMLProcessor = () => {
           <Button 
             onClick={startBatchProcessing} 
             disabled={isProcessing || jobs.filter(j => j.status === 'pending' || j.status === 'failed').length === 0}
-            className="button-gradient hover:shadow"
+            className="button-gradient hover:shadow w-full sm:w-auto whitespace-nowrap"
           >
             <Play className="h-4 w-4 mr-2" />
             Start Processing
@@ -413,7 +413,7 @@ const EnhancedMLProcessor = () => {
             variant="outline" 
             onClick={pauseProcessing} 
             disabled={!isProcessing}
-            className="hover:shadow"
+            className="hover:shadow w-full sm:w-auto"
           >
             <Pause className="h-4 w-4 mr-2" />
             Pause
@@ -422,7 +422,7 @@ const EnhancedMLProcessor = () => {
             variant="outline" 
             onClick={stopProcessing} 
             disabled={!isProcessing}
-            className="hover:shadow"
+            className="hover:shadow w-full sm:w-auto"
           >
             <Square className="h-4 w-4 mr-2" />
             Stop
@@ -462,7 +462,7 @@ const EnhancedMLProcessor = () => {
                   <Button
                     onClick={handleBulkUpload}
                     disabled={uploading}
-                    className="button-gradient hover:shadow"
+                    className="button-gradient hover:shadow w-full sm:w-auto"
                   >
                     {uploading ? (
                       <>
@@ -478,7 +478,7 @@ const EnhancedMLProcessor = () => {
                   </Button>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {uploadItems.map((item) => (
                     <div key={item.id} className="border rounded-lg p-4 space-y-3 hover:shadow-sm transition-shadow">
                       <div className="flex items-center justify-between">
@@ -730,6 +730,24 @@ const EnhancedMLProcessor = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Mobile Sticky Actions */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t p-3">
+        <div className="grid grid-cols-2 gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => setShowUploadSection(!showUploadSection)}
+          >
+            {showUploadSection ? 'Hide Upload' : 'Add Images'}
+          </Button>
+          <Button 
+            onClick={startBatchProcessing} 
+            disabled={isProcessing || jobs.filter(j => j.status === 'pending' || j.status === 'failed').length === 0}
+          >
+            Start
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

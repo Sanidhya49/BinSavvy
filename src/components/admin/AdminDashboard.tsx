@@ -184,7 +184,7 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center p-6 sm:p-8">
         <div className="flex items-center gap-3">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           <span>Loading admin dashboard...</span>
@@ -194,17 +194,17 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+    <div className="space-y-5 sm:space-y-6 pb-16 sm:pb-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
           Admin Dashboard
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Auto refresh</span>
             <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
           </div>
-          <Button variant="outline" size="sm" className="hover:shadow-md transition-shadow">
+          <Button variant="outline" size="sm" className="hover:shadow-md transition-shadow w-full sm:w-auto">
             <Settings className="h-4 w-4 mr-2" />
             System Settings
           </Button>
@@ -253,7 +253,7 @@ const AdminDashboard = () => {
       </Card>
       
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-5">
         <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Uploads</CardTitle>
@@ -383,7 +383,7 @@ const AdminDashboard = () => {
               <CardTitle className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Recent Uploads</CardTitle>
               <CardDescription>Latest user contributions</CardDescription>
             </div>
-            <Button variant="outline" size="sm" asChild className="hover:shadow">
+            <Button variant="outline" size="sm" asChild className="hover:shadow w-full sm:w-auto">
               <Link to="/admin/uploads">View all</Link>
             </Button>
           </div>
@@ -422,6 +422,18 @@ const AdminDashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Mobile Sticky Actions */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t p-3">
+        <div className="grid grid-cols-2 gap-2">
+          <Button asChild className="w-full">
+            <Link to="/admin/uploads">Uploads</Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full">
+            <Link to="/admin/analytics">Analytics</Link>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

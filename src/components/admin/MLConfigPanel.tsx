@@ -149,13 +149,13 @@ const MLConfigPanel = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-5 sm:space-y-6 pb-16 sm:pb-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-sky-600 bg-clip-text text-transparent">Advanced ML Configuration</h1>
-          <p className="text-muted-foreground">Configure machine learning models and processing settings</p>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-sky-600 bg-clip-text text-transparent">Advanced ML Configuration</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Configure machine learning models and processing settings</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <Button variant="outline" onClick={runPerformanceTest} disabled={loading} className="hover:shadow">
             <BarChart3 className="h-4 w-4 mr-2" />
             Performance Test
@@ -164,7 +164,7 @@ const MLConfigPanel = () => {
             <TestTube className="h-4 w-4 mr-2" />
             Test Service
           </Button>
-          <Button onClick={saveConfig} disabled={loading} className="hover:shadow">
+          <Button onClick={saveConfig} disabled={loading} className="hover:shadow w-full sm:w-auto">
             <Save className="h-4 w-4 mr-2" />
             Save Config
           </Button>
@@ -525,6 +525,14 @@ const MLConfigPanel = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Mobile Sticky Actions */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t p-3">
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" onClick={testMLService} disabled={loading}>Test</Button>
+          <Button onClick={saveConfig} disabled={loading}>Save</Button>
+        </div>
+      </div>
     </div>
   );
 };

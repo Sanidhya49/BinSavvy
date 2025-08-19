@@ -112,42 +112,42 @@ const UploadsManagement = () => {
     : uploads.filter(upload => upload.status === filter);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">User Uploads</h1>
-        <div className="flex space-x-2">
+    <div className="space-y-5 sm:space-y-6 pb-16 sm:pb-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">User Uploads</h1>
+        <div className="flex flex-wrap gap-2 sm:space-x-2 w-full sm:w-auto">
           <Button 
             variant={filter === "all" ? "default" : "outline"} 
             onClick={() => setFilter("all")}
-            className="transition-all hover:shadow"
+            className="transition-all hover:shadow w-full sm:w-auto"
           >
             All
           </Button>
           <Button 
             variant={filter === "pending" ? "default" : "outline"}
             onClick={() => setFilter("pending")}
-            className="transition-all hover:shadow"
+            className="transition-all hover:shadow w-full sm:w-auto"
           >
             Pending
           </Button>
           <Button 
             variant={filter === "processing" ? "default" : "outline"}
             onClick={() => setFilter("processing")}
-            className="transition-all hover:shadow"
+            className="transition-all hover:shadow w-full sm:w-auto"
           >
             Processing
           </Button>
           <Button 
             variant={filter === "completed" ? "default" : "outline"}
             onClick={() => setFilter("completed")}
-            className="transition-all hover:shadow"
+            className="transition-all hover:shadow w-full sm:w-auto"
           >
             Completed
           </Button>
         </div>
       </div>
       
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         {/* Uploads List */}
         <div className="md:col-span-2 space-y-4">
           {loading ? (
@@ -311,6 +311,13 @@ const UploadsManagement = () => {
               </CardContent>
             </Card>
           )}
+        </div>
+      </div>
+      {/* Mobile Sticky Actions */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t p-3">
+        <div className="flex gap-2">
+          <Button onClick={fetchUploads} className="w-full">Refresh</Button>
+          <Button variant="outline" className="w-full" onClick={() => setFilter('all')}>All</Button>
         </div>
       </div>
     </div>

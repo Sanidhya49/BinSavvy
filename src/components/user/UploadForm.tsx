@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +35,7 @@ const UploadForm = () => {
   const streamRef = useRef<MediaStream | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState<boolean>(true);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInitedRef = useRef<boolean>(false);
 
@@ -207,6 +208,15 @@ const UploadForm = () => {
     return () => stopCamera();
   }, []);
 
+  // Collapse activity by default on small screens
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        setActivityOpen(window.innerWidth >= 640);
+      }
+    } catch {}
+  }, []);
+
   // Initialize Leaflet from CDN when opening map (fallbacks gracefully)
   useEffect(() => {
     if (!mapOpen) return;
@@ -287,6 +297,21 @@ const UploadForm = () => {
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAddress(e.target.value);
+  };
+
+  const totalSizeMb = useMemo(() =>
+    ((items.reduce((a, b) => a + b.file.size, 0)) / 1024 / 1024).toFixed(1)
+  , [items]);
+
+  const logDotClass = (msg: string) => {
+    const m = msg.toLowerCase();
+    if (m.startsWith('uploaded')) return 'bg-emerald-500';
+    if (m.startsWith('uploading')) return 'bg-blue-500';
+    if (m.includes('offline')) return 'bg-amber-500';
+    if (m.startsWith('failed') || m.includes('rejected') || m.includes('skipped')) return 'bg-red-500';
+    if (m.startsWith('added') || m.startsWith('captured')) return 'bg-indigo-500';
+    if (m.startsWith('removed')) return 'bg-gray-400';
+    return 'bg-gray-300';
   };
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -448,7 +473,7 @@ const UploadForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto border-0 shadow-sm hover:shadow-md transition-shadow">
+    <Card className="w-full sm:max-w-2xl mx-auto border-0 shadow-sm hover:shadow-md transition-shadow px-3 sm:px-0">
       <CardHeader>
         <CardTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Upload Waste Image</CardTitle>
         <CardDescription>
@@ -457,7 +482,7 @@ const UploadForm = () => {
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleUpload}>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-5 sm:space-y-6">
           <div className="space-y-2">
             <Label htmlFor="image-upload">Upload Image</Label>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -496,7 +521,7 @@ const UploadForm = () => {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button" variant="outline" onClick={openCamera} className="text-xs hover:shadow">
+                  <Button type="button" variant="outline" onClick={openCamera} className="text-xs hover:shadow w-full sm:w-auto">
                     Use Camera
                   </Button>
                 </div>
@@ -504,13 +529,13 @@ const UploadForm = () => {
                   Supported formats: JPEG, PNG, WebP. Max size: 10MB.
                 </p>
               </div>
-              <div className="flex items-center justify-center border rounded-md p-2 min-h-[150px] bg-muted/30">
+              <div className="flex items-center justify-center border rounded-md p-2 min-h-[140px] sm:min-h-[150px] bg-muted/30">
                 {items.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2 w-full">
                     {items.map((it, idx) => (
                       <div key={it.id} className={`relative rounded overflow-hidden border group ${idx===activeIndex?'ring-2 ring-primary':''}`}>
                         <button type="button" className="w-full" onClick={() => setActiveIndex(idx)}>
-                          <img src={it.previewUrl} alt="Preview" className="h-24 w-full object-cover" />
+                          <img src={it.previewUrl} alt="Preview" className="h-20 sm:h-24 w-full object-cover" />
                         </button>
                         {it.status !== 'queued' && (
                           <span className="absolute bottom-0 left-0 right-0 text-[10px] bg-black/50 text-white px-1">{it.status}{it.progress!==null?` ${it.progress}%`:''}</span>
@@ -542,14 +567,15 @@ const UploadForm = () => {
                 variant="outline"
                 size="sm"
                 onClick={getGeoLocation}
-                className="text-xs hover:shadow"
+                className="text-xs hover:shadow w-auto"
                 disabled={useGps && latitude !== null}
               >
                 {useGps && latitude !== null ? "GPS Location Captured" : "Use GPS"}
               </Button>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Queue: {items.length}/{MAX_QUEUE_ITEMS} · Total size: {((items.reduce((a,b)=>a+b.file.size,0))/1024/1024).toFixed(1)}MB / {MAX_TOTAL_MB}MB
+            <div className="text-xs text-muted-foreground flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <span>Queue: {items.length}/{MAX_QUEUE_ITEMS}</span>
+              <span>Total size: {totalSizeMb}MB / {MAX_TOTAL_MB}MB</span>
             </div>
             <Textarea
               id="location"
@@ -563,13 +589,13 @@ const UploadForm = () => {
               <Input type="number" step="0.000001" placeholder="Latitude" value={latitude ?? ''} onChange={(e)=> setLatitude(e.target.value? Number(e.target.value): null)} />
               <Input type="number" step="0.000001" placeholder="Longitude" value={longitude ?? ''} onChange={(e)=> setLongitude(e.target.value? Number(e.target.value): null)} />
             </div>
-            <div className="flex gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => setMapOpen(true)} className="text-xs hover:shadow">Pick on Map</Button>
+            <div className="flex gap-2 flex-wrap">
+              <Button type="button" variant="outline" size="sm" onClick={() => setMapOpen(true)} className="text-xs hover:shadow w-full sm:w-auto">Pick on Map</Button>
               {items[activeIndex] && (
                 <>
-                  <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => transformActive('rotate')}>Rotate 90°</Button>
-                  <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => transformActive('flip')}>Flip</Button>
-                  <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => tryExtractExifGps(items[activeIndex].file)}>Auto GPS from EXIF</Button>
+                  <Button type="button" variant="outline" size="sm" className="text-xs w-full sm:w-auto" onClick={() => transformActive('rotate')}>Rotate 90°</Button>
+                  <Button type="button" variant="outline" size="sm" className="text-xs w-full sm:w-auto" onClick={() => transformActive('flip')}>Flip</Button>
+                  <Button type="button" variant="outline" size="sm" className="text-xs w-full sm:w-auto" onClick={() => tryExtractExifGps(items[activeIndex].file)}>Auto GPS from EXIF</Button>
                 </>
               )}
             </div>
@@ -597,16 +623,53 @@ const UploadForm = () => {
           </Button>
         </CardFooter>
       </form>
-      {logs.length > 0 && (
-        <div className="mt-4 text-xs text-muted-foreground">
-          <div className="font-medium mb-1">Activity</div>
-          <ul className="space-y-1 max-h-28 overflow-auto pr-1">
-            {logs.map((l) => (
-              <li key={l.id}>• {new Date(l.ts).toLocaleTimeString()} — {l.message}</li>
-            ))}
-          </ul>
+      <div className="mt-3 sm:mt-4">
+        <div className="flex items-center justify-between">
+          <button type="button" className="text-xs font-medium text-gray-700 hover:underline" onClick={() => setActivityOpen((o) => !o)}>
+            {activityOpen ? '▼' : '►'} Activity {logs.length > 0 ? `(${logs.length})` : ''}
+          </button>
+          {logs.length > 0 && (
+            <button type="button" className="text-xs text-gray-500 hover:text-gray-700" onClick={() => setLogs([])}>Clear</button>
+          )}
         </div>
-      )}
+        {activityOpen && (
+          <div className="mt-2 text-xs text-muted-foreground border rounded-md p-2 bg-muted/20">
+            {uploadProgress !== null && (
+              <div className="mb-2">
+                <div className="h-1.5 w-full bg-gray-200 rounded overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-green-500 to-blue-600" style={{ width: `${Math.min(100, Math.max(0, uploadProgress))}%` }} />
+                </div>
+                <div className="mt-1 flex justify-between">
+                  <span>Uploading…</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+              </div>
+            )}
+            {items.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1">
+                <span>Queue: <strong>{items.length}/{MAX_QUEUE_ITEMS}</strong></span>
+                <span>Total: <strong>{totalSizeMb}MB</strong> / {MAX_TOTAL_MB}MB</span>
+              </div>
+            )}
+            {logs.length === 0 ? (
+              <div className="text-gray-400">No recent activity</div>
+            ) : (
+              <ul className="space-y-1 max-h-28 sm:max-h-36 overflow-auto pr-1" aria-live="polite">
+                {logs.map((l) => (
+                  <li key={l.id} className="flex items-start gap-2">
+                    <span className={`mt-1 inline-block h-2 w-2 rounded-full ${logDotClass(l.message)}`} />
+                    <span className="flex-1 min-w-0">
+                      <span className="text-gray-700">{new Date(l.ts).toLocaleTimeString()}</span>
+                      <span className="mx-1">—</span>
+                      <span className="truncate inline-block max-w-[18rem] sm:max-w-none align-top">{l.message}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
       <Dialog open={cameraOpen} onOpenChange={(open) => { setCameraOpen(open); if (!open) stopCamera(); }}>
         <DialogContent className="sm:max-w-[720px]">
           <DialogHeader>
