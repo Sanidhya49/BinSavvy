@@ -168,6 +168,22 @@ export default function UploadHistory() {
     }
   };
 
+  const handleDelete = async (imageId: string) => {
+    try {
+      const ok = window.confirm('Delete this image? This will also remove it from Cloudinary.');
+      if (!ok) return;
+      const res = await apiClient.deleteImage(imageId);
+      if (res.success) {
+        setUploads((prev) => prev.filter((u) => u.image_id !== imageId));
+        refreshData();
+      } else {
+        alert(res.error || 'Failed to delete image');
+      }
+    } catch (e) {
+      alert('Failed to delete image');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-6 sm:p-8">
@@ -294,6 +310,15 @@ export default function UploadHistory() {
                   >
                     <Eye className="h-3 w-3 mr-1" />
                     View Details
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(upload.image_id)}
+                    className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 w-full sm:w-auto"
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" />
+                    Delete
                   </Button>
                 </div>
               </CardContent>

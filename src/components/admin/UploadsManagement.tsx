@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow, format } from "date-fns";
 import { Link } from "react-router-dom";
 import { apiClient } from "@/lib/api";
+import { Trash2 } from "lucide-react";
 
 const UploadsManagement = () => {
   const [uploads, setUploads] = useState<ImageUpload[]>([]);
@@ -89,6 +90,23 @@ const UploadsManagement = () => {
         return "ML Unavailable";
       default:
         return "Pending";
+    }
+  };
+
+  const handleDeleteUpload = async (imageId: string) => {
+    try {
+      const ok = window.confirm("Delete this upload? This will also remove the asset from Cloudinary.");
+      if (!ok) return;
+      const res = await apiClient.deleteImage(imageId);
+      if (res.success) {
+        setUploads((prev) => prev.filter((u) => u.image_id !== imageId));
+        if (selectedUpload?.image_id === imageId) setSelectedUpload(null);
+        toast.success("Upload deleted");
+      } else {
+        toast.error(res.error || "Failed to delete upload");
+      }
+    } catch (e) {
+      toast.error("Failed to delete upload");
     }
   };
 
@@ -179,6 +197,18 @@ const UploadsManagement = () => {
                         e.currentTarget.src = '/placeholder.svg';
                       }}
                     />
+                    {/* Quick delete on card */}
+                    <div className="absolute top-2 left-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); handleDeleteUpload(upload.image_id); }}
+                        className="h-7 px-2 text-red-600 hover:text-red-700 border-red-200 bg-white/80 backdrop-blur"
+                        title="Delete upload"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                     <div className="absolute top-2 right-2">
                       <StatusBadge status={upload.status} />
                     </div>
@@ -290,6 +320,16 @@ const UploadsManagement = () => {
                           )}
                         </Button>
                       )}
+
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDeleteUpload(selectedUpload.image_id)}
+                        className="mt-2 w-full text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                        size="sm"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Upload
+                      </Button>
                       
                       {selectedUpload.status === "processing" && (
                         <div className="text-center">

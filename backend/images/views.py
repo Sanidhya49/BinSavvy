@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 import cloudinary
 import cloudinary.uploader
-from cloudinary_config import upload_image as cloudinary_upload_image, delete_image
+from cloudinary_config import upload_image as cloudinary_upload_image, delete_image as cloudinary_delete_image
 
 # Import ML tasks with error handling
 try:
@@ -251,7 +251,7 @@ def delete_image(request, image_id):
         # Delete from Cloudinary if public_id exists
         if image_to_delete.get('cloudinary_public_id'):
             try:
-                delete_success = delete_image(image_to_delete['cloudinary_public_id'])
+                delete_success = cloudinary_delete_image(image_to_delete['cloudinary_public_id'])
                 if delete_success:
                     print(f"Image {image_id} deleted from Cloudinary successfully")
                 else:
