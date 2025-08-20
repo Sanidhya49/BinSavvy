@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-e-@u6nvikmsrdg3-h9o@0(f%il
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -163,16 +163,22 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite dev server (default)
-    "http://localhost:8080",  # Vite dev server (custom port)
-    "http://127.0.0.1:8080",  # Alternative localhost
-    "http://127.0.0.1:5173",  # Alternative localhost
-]
+# CORS settings
+_cors_origins = os.getenv('CORS_ALLOWED_ORIGINS')
+if _cors_origins:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5173",  # Vite dev server (default)
+        "http://localhost:8080",  # Vite dev server (custom port)
+        "http://127.0.0.1:8080",  # Alternative localhost
+        "http://127.0.0.1:5173",  # Alternative localhost
+    ]
 
 # Additional CORS settings for development
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True  # Only for development - remove in production
+# Allow-all only in dev; in production set CORS_ALLOWED_ORIGINS via env
+CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL', 'True').lower() == 'true'
 
 # Firebase settings
 FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID', 'binsavvy')
