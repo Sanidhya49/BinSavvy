@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { authManager } from "@/lib/auth";
+import { authManager } from "@/lib/auth.ts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
