@@ -125,7 +125,9 @@ dist/
 downloads/
 eggs/
 .eggs/
+# Ignore generic lib directories from some tools, but keep frontend src/lib
 lib/
+!src/lib/
 lib64/
 parts/
 sdist/
