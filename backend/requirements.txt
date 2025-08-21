@@ -11,12 +11,13 @@ celery==5.3.6
 redis==5.0.1
 # ultralytics pulls in torch/torchvision and large CUDA deps; avoid on Render
 # Keep YOLO optional via Roboflow-only path in production
-opencv-python-headless==4.9.0.80
-numpy==1.26.4
+# Remove heavy CV deps for Render free tier
+# If you need local YOLO later, add these back
+# opencv-python-headless==4.9.0.80
+# numpy==1.26.4
 requests==2.32.4
 cloudinary==1.37.0
 firebase-admin==6.4.0
-inference-sdk==0.9.0
 roboflow==1.2.0
 eventlet==0.35.2
 gunicorn==21.2.0
