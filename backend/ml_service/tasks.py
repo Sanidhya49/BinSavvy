@@ -5,13 +5,6 @@ import requests
 from celery import shared_task
 import django
 from django.conf import settings
-from ultralytics import YOLO
-import cv2
-import numpy as np
-from PIL import Image
-import io
-import cloudinary
-import cloudinary.uploader
 from cloudinary_config import upload_processed_image
 from roboflow_config import roboflow_config
 
@@ -111,11 +104,14 @@ def process_image_with_yolo(image_id: str, image_url: str, location: str = "", c
         
         # Load YOLO model
         try:
+            # Lazy import to avoid heavy dependency at startup
+            from ultralytics import YOLO  # type: ignore
             model = YOLO('yolov8n-seg.pt')
         except Exception as model_error:
             print(f"Error loading YOLO model: {model_error}")
             # Try with weights_only=False as fallback
             try:
+                from ultralytics import YOLO  # type: ignore
                 model = YOLO('yolov8n-seg.pt', weights_only=False)
             except Exception as fallback_error:
                 print(f"Fallback YOLO loading also failed: {fallback_error}")
