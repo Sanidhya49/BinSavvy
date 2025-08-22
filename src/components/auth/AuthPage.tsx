@@ -5,11 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
-import { useAuth } from "@/contexts/AuthContext";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const { user } = useAuth();
   
   const toggleForm = () => {
     setIsLogin(!isLogin);
@@ -22,17 +20,15 @@ const AuthPage = () => {
       <div className="pointer-events-none absolute top-1/3 -right-24 h-72 w-72 rounded-full bg-emerald-300/30 blur-3xl" />
       <div className="pointer-events-none absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-blue-300/20 blur-3xl" />
 
-      {/* Back to Dashboard Button for logged-in users */}
-      {user && (
-        <div className="absolute top-6 left-6 z-10">
-          <Button variant="outline" asChild className="bg-white/80 backdrop-blur-sm hover:bg-white">
-            <Link to={user.role === "admin" ? "/admin" : "/dashboard"}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Link>
-          </Button>
-        </div>
-      )}
+      {/* Back to Home Button */}
+      <div className="absolute top-6 left-6 z-10">
+        <Button variant="outline" asChild className="bg-white/80 backdrop-blur-sm hover:bg-white">
+          <Link to="/">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Link>
+        </Button>
+      </div>
 
       <div className="container flex flex-col items-center justify-center flex-1 px-4 py-12">
         {/* Title */}
