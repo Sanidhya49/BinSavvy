@@ -382,11 +382,7 @@ export default function UploadHistory() {
                           <strong>Total Detections:</strong> {selectedImage.analysis_results.total_detections}
                         </div>
                       )}
-                      {selectedImage.analysis_results.model_used && (
-                        <div>
-                          <strong>Model Used:</strong> {selectedImage.analysis_results.model_used}
-                        </div>
-                      )}
+
                       {selectedImage.analysis_results.average_confidence && (
                         <div>
                           <strong>Average Confidence:</strong> {(selectedImage.analysis_results.average_confidence * 100).toFixed(1)}%

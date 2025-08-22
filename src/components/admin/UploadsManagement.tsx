@@ -277,9 +277,7 @@ const UploadsManagement = () => {
                   {selectedUpload.analysis_results ? (
                     <div>
                       <h4 className="text-sm font-medium">Analysis Results</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Model: {selectedUpload.analysis_results.model_used || "Unknown"}
-                      </p>
+
                       <p className="text-sm text-muted-foreground">
                         Detections: {selectedUpload.analysis_results.total_detections || 0}
                       </p>
