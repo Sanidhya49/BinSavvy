@@ -59,7 +59,9 @@ def create_processed_image_with_detections(image_path: str, predictions: list, c
             
             # Filter predictions by confidence threshold
             filtered_predictions = [p for p in predictions if p.get('confidence', 0) >= confidence_threshold]
+            print(f"DEBUG: Total predictions: {len(predictions)}")
             print(f"DEBUG: Filtered predictions: {filtered_predictions}")
+            print(f"DEBUG: Image size: {img.size}")
             
             # Draw detection boxes
             for prediction in filtered_predictions:
@@ -118,6 +120,9 @@ def create_processed_image_with_detections(image_path: str, predictions: list, c
             # Save processed image to temporary file
             temp_processed_path = tempfile.mktemp(suffix='.jpg')
             processed_img.save(temp_processed_path, 'JPEG', quality=95)
+            print(f"DEBUG: Processed image saved to: {temp_processed_path}")
+            print(f"DEBUG: File exists: {os.path.exists(temp_processed_path)}")
+            print(f"DEBUG: File size: {os.path.getsize(temp_processed_path) if os.path.exists(temp_processed_path) else 'N/A'}")
             
             return temp_processed_path
             
@@ -147,9 +152,11 @@ def process_image_with_roboflow_sync(image_id: str, image_url: str, location: st
         
         # Process with Roboflow directly from URL
         roboflow_result = roboflow_config.predict_image_from_url(image_url, confidence_threshold)
+        print(f"DEBUG: Raw Roboflow result: {roboflow_result}")
         
         # Analyze predictions
         analysis_results = roboflow_config.analyze_predictions(roboflow_result)
+        print(f"DEBUG: Analysis results: {analysis_results}")
         
         # Create and upload processed image with detection overlays
         processed_image_url = None
@@ -170,6 +177,8 @@ def process_image_with_roboflow_sync(image_id: str, image_url: str, location: st
             # Upload processed image to Cloudinary
             processed_image_url = upload_processed_image(processed_image_path, folder="binsavvy/processed")
             print(f"DEBUG: Processed image uploaded to: {processed_image_url}")
+            print(f"DEBUG: Original image URL: {image_url}")
+            print(f"DEBUG: URLs are same: {processed_image_url == image_url}")
             
             # Clean up temporary processed image
             if processed_image_path != temp_file_path and os.path.exists(processed_image_path):

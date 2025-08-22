@@ -84,10 +84,18 @@ class RoboflowConfig:
                 "confidence": confidence_threshold
             }
             
+            print(f"DEBUG: Roboflow API call - URL: {url}")
+            print(f"DEBUG: Roboflow API call - Params: {params}")
+            
             response = requests.post(url, headers=headers, params=params)
             
+            print(f"DEBUG: Roboflow API response status: {response.status_code}")
+            print(f"DEBUG: Roboflow API response text: {response.text[:500]}...")  # First 500 chars
+            
             if response.status_code == 200:
-                return response.json()
+                result = response.json()
+                print(f"DEBUG: Roboflow API response JSON: {result}")
+                return result
             else:
                 raise Exception(f"API request failed with status {response.status_code}: {response.text}")
                 
