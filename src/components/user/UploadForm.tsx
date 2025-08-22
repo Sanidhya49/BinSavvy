@@ -154,9 +154,32 @@ const UploadForm = () => {
       toast.error("Camera is not supported on this device/browser");
       return;
     }
+    
+    // Check if we're on mobile and suggest using the file input with camera
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // On mobile, use the file input with camera capture
+      const fileInput = document.getElementById('image-upload') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.setAttribute('capture', 'environment');
+        fileInput.click();
+        // Reset capture attribute after click
+        setTimeout(() => {
+          fileInput.removeAttribute('capture');
+        }, 100);
+        return;
+      }
+    }
+    
+    // Desktop camera modal
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
+        video: { 
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
         audio: false,
       });
       streamRef.current = stream;
@@ -517,16 +540,27 @@ const UploadForm = () => {
                     multiple
                     onChange={handleFileChange}
                     className="cursor-pointer"
-                    {...({ capture: "environment" } as any)}
+                    capture="environment"
                   />
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button" variant="outline" onClick={openCamera} className="text-xs hover:shadow w-full sm:w-auto">
-                    Use Camera
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={openCamera} 
+                    className="text-xs hover:shadow w-full sm:w-auto"
+                  >
+                    {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                      ? "📷 Take Photo" 
+                      : "Use Camera"
+                    }
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Supported formats: JPEG, PNG, WebP. Max size: 10MB.
+                  {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && (
+                    <span className="block mt-1 text-blue-600">📱 Tap "Take Photo" to use your camera directly</span>
+                  )}
                 </p>
               </div>
               <div className="flex items-center justify-center border rounded-md p-2 min-h-[140px] sm:min-h-[150px] bg-muted/30">

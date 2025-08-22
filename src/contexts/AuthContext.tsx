@@ -52,15 +52,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // For demo, just check if we have tokens and set loading to false
-        // Don't make API calls on mount to avoid 401 errors
         const hasTokens = authManager.isAuthenticated();
         console.log('Auth check - has tokens:', hasTokens);
         
-        // If we have tokens, we'll let the user navigate and handle auth on demand
         if (hasTokens) {
-          // Don't set user here, let it be set after successful login
-          console.log('Tokens found, but not setting user on mount');
+          // For mobile compatibility, set authentication state immediately if tokens exist
+          setIsAuthenticated(true);
+          console.log('Tokens found, setting authentication state for mobile compatibility');
+          
+          // Try to get user data if possible, but don't fail if it doesn't work
+          try {
+            // This is a demo app, so we'll use a simple approach
+            // In a real app, you'd validate the token with the backend
+            const storedUser = localStorage.getItem('demo_user');
+            if (storedUser) {
+              const userData = JSON.parse(storedUser);
+              setUser(userData);
+              console.log('Restored user from storage:', userData);
+            }
+          } catch (e) {
+            console.log('Could not restore user data, but keeping authentication state');
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -90,6 +102,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('AuthContext: Setting user:', response.data.user);
         setUser(response.data.user);
         setIsAuthenticated(true); // Set authentication state immediately
+        
+        // Store user data for mobile compatibility
+        try {
+          localStorage.setItem('demo_user', JSON.stringify(response.data.user));
+        } catch (e) {
+          console.log('Could not store user data in localStorage');
+        }
         
         // Force a re-render by updating state
         console.log('AuthContext: Login successful, user set:', response.data.user);
