@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Image, BarChart3, Settings, User } from 'lucide-react';
+import { Upload, Image, BarChart3, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClient, ImageUpload } from '@/lib/api';
 
@@ -106,7 +106,7 @@ export default function UserDashboard() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Uploads</CardTitle>
@@ -168,7 +168,7 @@ export default function UserDashboard() {
       <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            <Settings className="h-5 w-5" />
+            <Upload className="h-5 w-5" />
             Quick Actions
           </CardTitle>
           <CardDescription>
@@ -176,23 +176,18 @@ export default function UserDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" asChild className="hover:shadow w-full sm:w-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Button variant="outline" size="lg" asChild className="hover:shadow-lg hover:-translate-y-0.5 transition-all h-12">
               <a href="/upload">
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="h-5 w-5 mr-3" />
                 Upload New Image
               </a>
             </Button>
-            <Button variant="outline" size="sm" asChild className="hover:shadow w-full sm:w-auto">
+            <Button variant="outline" size="lg" asChild className="hover:shadow-lg hover:-translate-y-0.5 transition-all h-12">
               <a href="/history">
-                <Image className="h-4 w-4 mr-2" />
+                <Image className="h-5 w-5 mr-3" />
                 View All Images
               </a>
-            </Button>
-            
-            <Button variant="outline" size="sm" className="hover:shadow w-full sm:w-auto">
-              <Settings className="h-4 w-4 mr-2" />
-              Account Settings
             </Button>
           </div>
         </CardContent>

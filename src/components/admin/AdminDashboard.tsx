@@ -13,7 +13,6 @@ import {
   AlertTriangle, 
   Clock, 
   BarChart3, 
-  Settings,
   Activity,
   Database,
   Cpu,
@@ -200,14 +199,10 @@ const AdminDashboard = () => {
           Admin Dashboard
         </h1>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg">
             <span>Auto refresh</span>
             <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
           </div>
-          <Button variant="outline" size="sm" className="hover:shadow-md transition-shadow w-full sm:w-auto">
-            <Settings className="h-4 w-4 mr-2" />
-            System Settings
-          </Button>
         </div>
       </div>
       
