@@ -4,8 +4,11 @@ import { authManager, makeAuthenticatedRequest } from './auth';
 export const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL || 'http://localhost:8000/api';
 
 // Debug: Log the API URL being used
-console.log('API_BASE_URL:', API_BASE_URL);
+console.log('=== DEBUG INFO ===');
+console.log('import.meta.env:', (import.meta as any)?.env);
 console.log('VITE_API_URL env var:', (import.meta as any)?.env?.VITE_API_URL);
+console.log('API_BASE_URL:', API_BASE_URL);
+console.log('==================');
 
 export interface ApiResponse<T = any> {
   success: boolean;
