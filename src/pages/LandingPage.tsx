@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Github, Linkedin, Upload, BarChart3, Users, Globe, ArrowRight, CheckCircle, TrendingUp, Activity, MapPin } from "lucide-react";
 
+// Updated landing page with enhanced UI and public reports section
 const LandingPage = () => {
   const { user } = useAuth();
 
