@@ -278,7 +278,10 @@ const UploadsManagement = () => {
                     <div>
                       <h4 className="text-sm font-medium">Analysis Results</h4>
                       <p className="text-sm text-muted-foreground">
-                        Detections: {selectedUpload.analysis_results.total_detections || 0}
+                        {selectedUpload.analysis_results.total_detections && selectedUpload.analysis_results.total_detections > 0 
+                          ? 'Garbage detected' 
+                          : 'Not detected'
+                        }
                       </p>
                       {selectedUpload.processed_image_url && (
                         <div className="mt-2">

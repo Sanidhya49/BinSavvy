@@ -19,6 +19,7 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminUploads from "./pages/admin/AdminUploads";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminAnalysis from "./pages/admin/AdminAnalysis";
 import AdminMLProcessor from "./pages/admin/AdminMLProcessor";
 import TestConnection from "./components/TestConnection";
 import BackendTest from "./components/BackendTest";
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/admin/uploads" element={<AdminUploads />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/analysis/:imageId" element={<AdminAnalysis />} />
             <Route path="/admin/ml-processor" element={<AdminMLProcessor />} />
             
             {/* Test routes */}

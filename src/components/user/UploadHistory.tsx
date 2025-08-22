@@ -273,11 +273,14 @@ export default function UploadHistory() {
                     </span>
                   </div>
                   
-                  {upload.analysis_results && upload.analysis_results.total_detections && (
+                  {upload.analysis_results && (
                     <div className="flex items-center gap-2">
                       <BarChart3 className="h-3 w-3 text-green-600" />
                       <span className="text-xs text-green-600 font-medium">
-                        Item detected
+                        {upload.analysis_results.total_detections && upload.analysis_results.total_detections > 0 
+                          ? 'Garbage detected' 
+                          : 'Not detected'
+                        }
                       </span>
                     </div>
                   )}
@@ -377,9 +380,12 @@ export default function UploadHistory() {
                   <div className="border-t pt-4">
                     <h3 className="font-semibold mb-2">Analysis Results</h3>
                     <div className="space-y-2 text-sm">
-                      {selectedImage.analysis_results.total_detections && (
+                      {selectedImage.analysis_results.total_detections !== undefined && (
                         <div>
-                          <strong>Total Detections:</strong> {selectedImage.analysis_results.total_detections}
+                          <strong>Detection Status:</strong> {selectedImage.analysis_results.total_detections > 0 
+                            ? 'Garbage detected' 
+                            : 'Not detected'
+                          }
                         </div>
                       )}
 
