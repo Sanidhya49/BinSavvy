@@ -45,15 +45,15 @@ const UploadsManagement = () => {
           setError(response.error);
         }
       }
-    } catch (error) {
+      } catch (error) {
       console.error('Error fetching uploads for management:', error);
       setError('Failed to load uploads');
       setUploads([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+      } finally {
+        setLoading(false);
+      }
+    };
+    
   const handleStartAnalysis = async (upload: ImageUpload) => {
     try {
       setProcessingUpload(upload.image_id);
@@ -320,16 +320,16 @@ const UploadsManagement = () => {
                           )}
                         </Button>
                       )}
-
-                      <Button
-                        variant="outline"
+                      
+                        <Button 
+                          variant="outline"
                         onClick={() => handleDeleteUpload(selectedUpload.image_id)}
                         className="mt-2 w-full text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                         size="sm"
-                      >
+                        >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete Upload
-                      </Button>
+                        </Button>
                       
                       {selectedUpload.status === "processing" && (
                         <div className="text-center">
