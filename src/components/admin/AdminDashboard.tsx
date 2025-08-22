@@ -354,7 +354,7 @@ const AdminDashboard = () => {
           
           <div className="rounded-xl p-4 flex flex-col items-center justify-center space-y-3 bg-gradient-to-br from-purple-50 to-purple-100/30 border hover:shadow-md transition-all">
             <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-              <Settings className="h-6 w-6 text-purple-600" />
+              <Zap className="h-6 w-6 text-purple-600" />
             </div>
             <div className="space-y-1 text-center">
               <h3 className="font-medium">ML Configuration</h3>
