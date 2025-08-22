@@ -64,12 +64,20 @@ def create_processed_image_with_detections(image_path: str, predictions: list, c
             # Draw detection boxes
             for prediction in filtered_predictions:
                 # Extract bounding box coordinates
-                x = prediction.get('x', 0)
-                y = prediction.get('y', 0)
-                width = prediction.get('width', 0)
-                height = prediction.get('height', 0)
+                # Roboflow returns coordinates as percentages of image dimensions
+                x_pct = prediction.get('x', 0)
+                y_pct = prediction.get('y', 0)
+                width_pct = prediction.get('width', 0)
+                height_pct = prediction.get('height', 0)
                 confidence = prediction.get('confidence', 0)
                 class_name = prediction.get('class', 'Garbage')
+                
+                # Convert percentages to pixel coordinates
+                img_width, img_height = img.size
+                x = x_pct * img_width / 100
+                y = y_pct * img_height / 100
+                width = width_pct * img_width / 100
+                height = height_pct * img_height / 100
                 
                 # Calculate box coordinates
                 x1 = x - width / 2
@@ -97,8 +105,7 @@ def create_processed_image_with_detections(image_path: str, predictions: list, c
         # Return original image path if processing fails
         return image_path
 
-@shared_task
-def process_image_with_roboflow(image_id: str, image_url: str, location: str = "", confidence_threshold: float = 0.1, min_detection_size: int = 20, max_detections: int = 50):
+def process_image_with_roboflow_sync(image_id: str, image_url: str, location: str = "", confidence_threshold: float = 0.1, min_detection_size: int = 20, max_detections: int = 50):
     """
     Process image using Roboflow waste detection model
     
@@ -176,8 +183,7 @@ def process_image_with_roboflow(image_id: str, image_url: str, location: str = "
         if temp_file_path and os.path.exists(temp_file_path):
             os.unlink(temp_file_path)
 
-@shared_task
-def process_image_with_yolo(image_id: str, image_url: str, location: str = "", confidence_threshold: float = 0.1, min_detection_size: int = 20, max_detections: int = 50):
+def process_image_with_yolo_sync(image_id: str, image_url: str, location: str = "", confidence_threshold: float = 0.1, min_detection_size: int = 20, max_detections: int = 50):
     """
     Process image using local YOLOv8 model (fallback)
     
@@ -339,9 +345,9 @@ def process_image(image_id: str, image_url: str, location: str = "", use_roboflo
         print(f"Starting ML processing for image {image_id} with confidence={confidence_threshold}")
         
         if use_roboflow:
-            return process_image_with_roboflow(image_id, image_url, location, confidence_threshold, min_detection_size, max_detections)
+            return process_image_with_roboflow_sync(image_id, image_url, location, confidence_threshold, min_detection_size, max_detections)
         else:
-            return process_image_with_yolo(image_id, image_url, location, confidence_threshold, min_detection_size, max_detections)
+            return process_image_with_yolo_sync(image_id, image_url, location, confidence_threshold, min_detection_size, max_detections)
             
     except Exception as e:
         print(f"Error in process_image: {str(e)}")
@@ -349,4 +355,15 @@ def process_image(image_id: str, image_url: str, location: str = "", use_roboflo
             'image_id': image_id,
             'error': str(e),
             'status': 'failed'
-        } 
+        }
+
+# Celery task versions for future async processing
+@shared_task
+def process_image_with_roboflow(image_id: str, image_url: str, location: str = "", confidence_threshold: float = 0.1, min_detection_size: int = 20, max_detections: int = 50):
+    """Celery task version of Roboflow processing"""
+    return process_image_with_roboflow_sync(image_id, image_url, location, confidence_threshold, min_detection_size, max_detections)
+
+@shared_task
+def process_image_with_yolo(image_id: str, image_url: str, location: str = "", confidence_threshold: float = 0.1, min_detection_size: int = 20, max_detections: int = 50):
+    """Celery task version of YOLO processing"""
+    return process_image_with_yolo_sync(image_id, image_url, location, confidence_threshold, min_detection_size, max_detections)
