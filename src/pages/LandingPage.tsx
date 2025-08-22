@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Mail, Github, Linkedin, Upload, BarChart3, Users, Globe, ArrowRight, CheckCircle } from "lucide-react";
 
 const LandingPage = () => {
   const { user } = useAuth();
@@ -9,10 +10,10 @@ const LandingPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation */}
-      <header className="py-4 px-6 md:px-10 flex items-center justify-between border-b">
+      <header className="py-4 px-6 md:px-10 flex items-center justify-between border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <div className="bg-gradient-to-r from-binsavvy-500 to-waste-600 w-8 h-8 rounded-md flex items-center justify-center">
-            <span className="text-white font-bold">BS</span>
+            <span className="text-white font-bold text-sm">BS</span>
           </div>
           <span className="font-bold text-xl">BinSavvy</span>
         </div>
@@ -26,11 +27,11 @@ const LandingPage = () => {
             </Button>
           ) : (
             <>
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild className="hidden sm:inline-flex">
                 <Link to="/auth">Login</Link>
               </Button>
               <Button className="button-gradient" asChild>
-                <Link to="/auth">Sign Up</Link>
+                <Link to="/auth">Get Started</Link>
               </Button>
             </>
           )}
@@ -38,22 +39,44 @@ const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col md:flex-row">
+      <section className="flex-1 flex flex-col lg:flex-row">
         <div className="flex-1 flex items-center justify-center p-6 md:p-10 lg:p-20">
           <div className="max-w-xl space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+              <CheckCircle className="h-4 w-4" />
+              AI-Powered Waste Detection
+            </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              Smart Waste Analysis Platform
+              Smart Waste{" "}
+              <span className="bg-gradient-to-r from-binsavvy-600 to-waste-600 bg-clip-text text-transparent">
+                Analysis
+              </span>{" "}
+              Platform
             </h1>
             <p className="text-xl text-muted-foreground">
-              Help us build a cleaner world by contributing to our waste detection and analysis system.
+              Join our community effort to build a cleaner world. Upload waste images, get instant AI analysis, and help identify waste-prone areas for better environmental management.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" className="button-gradient">
-                <Link to="/auth">Get Started</Link>
+              <Button asChild size="lg" className="button-gradient group">
+                <Link to="/auth">
+                  Start Contributing
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link to="#how-it-works">Learn More</Link>
-              </Button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                Instant AI Analysis
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                Community Driven
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                Free to Use
+              </div>
             </div>
           </div>
         </div>
@@ -86,21 +109,9 @@ const LandingPage = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-background rounded-lg p-6 text-center space-y-4 shadow-sm">
+            <div className="bg-background rounded-lg p-6 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-16 h-16 bg-binsavvy-100 rounded-full flex items-center justify-center mx-auto">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-8 w-8 text-binsavvy-600"
-                >
-                  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
-                  <circle cx="12" cy="13" r="3" />
-                </svg>
+                <Upload className="h-8 w-8 text-binsavvy-600" />
               </div>
               <h3 className="text-xl font-medium">Upload Images</h3>
               <p className="text-muted-foreground">
@@ -108,22 +119,9 @@ const LandingPage = () => {
               </p>
             </div>
             
-            <div className="bg-background rounded-lg p-6 text-center space-y-4 shadow-sm">
+            <div className="bg-background rounded-lg p-6 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-16 h-16 bg-waste-100 rounded-full flex items-center justify-center mx-auto">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-8 w-8 text-waste-600"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <path d="M12 8v8" />
-                  <path d="M8 12h8" />
-                </svg>
+                <BarChart3 className="h-8 w-8 text-waste-600" />
               </div>
               <h3 className="text-xl font-medium">AI Analysis</h3>
               <p className="text-muted-foreground">
@@ -131,58 +129,157 @@ const LandingPage = () => {
               </p>
             </div>
             
-            <div className="bg-background rounded-lg p-6 text-center space-y-4 shadow-sm">
+            <div className="bg-background rounded-lg p-6 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-16 h-16 bg-binsavvy-100 rounded-full flex items-center justify-center mx-auto">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-8 w-8 text-binsavvy-600"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <path d="m9 11 3 3L22 4" />
-                </svg>
+                <Users className="h-8 w-8 text-binsavvy-600" />
               </div>
-              <h3 className="text-xl font-medium">Insights & Actions</h3>
+              <h3 className="text-xl font-medium">Community Impact</h3>
               <p className="text-muted-foreground">
-                Get insights on waste composition and contribute to targeted cleanup initiatives.
+                Contribute to environmental research and help develop better waste management solutions.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Call to Action */}
+      {/* Public Reports Section */}
       <section className="py-16 px-6 bg-gradient-to-br from-binsavvy-500 to-waste-600 text-white">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl font-bold">Join Our Waste Analysis Community</h2>
-          <p className="text-xl">
-            Help us build a comprehensive database of waste information to develop better waste management solutions.
-          </p>
-          <Button asChild size="lg" variant="outline" className="bg-white hover:bg-white/90 text-binsavvy-700">
-            <Link to="/auth">Get Started Today</Link>
-          </Button>
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold">Public Reports & Insights</h2>
+            <p className="text-xl opacity-90">
+              Explore our community-driven waste analysis reports and environmental insights
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
+              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                <Globe className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-semibold">Global Waste Trends</h3>
+              <p className="opacity-90">
+                Discover patterns in waste distribution across different regions and communities.
+              </p>
+              <div className="pt-2">
+                <span className="text-sm opacity-75">Updated weekly</span>
+              </div>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
+              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                <BarChart3 className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-semibold">AI Detection Stats</h3>
+              <p className="opacity-90">
+                View statistics on waste detection accuracy and model performance metrics.
+              </p>
+              <div className="pt-2">
+                <span className="text-sm opacity-75">Real-time data</span>
+              </div>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
+              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                <Users className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-semibold">Community Impact</h3>
+              <p className="opacity-90">
+                See how our community contributions are making a difference in environmental research.
+              </p>
+              <div className="pt-2">
+                <span className="text-sm opacity-75">Monthly reports</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center pt-8">
+            <Button asChild size="lg" variant="outline" className="bg-white hover:bg-white/90 text-binsavvy-700">
+              <Link to="/auth">Start Contributing Today</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-muted/30 py-8 px-6">
+      <footer className="bg-gray-900 text-white py-12 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-gradient-to-r from-binsavvy-500 to-waste-600 w-8 h-8 rounded-md flex items-center justify-center">
-                <span className="text-white font-bold">BS</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Company Info */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="bg-gradient-to-r from-binsavvy-500 to-waste-600 w-8 h-8 rounded-md flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">BS</span>
+                </div>
+                <span className="font-bold text-lg">BinSavvy</span>
               </div>
-              <span className="font-bold">BinSavvy</span>
+              <p className="text-gray-300 text-sm">
+                Smart waste analysis platform powered by AI and community contributions.
+              </p>
             </div>
             
-            <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} BinSavvy. All rights reserved.
+            {/* Platform Links */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Platform</h3>
+              <ul className="space-y-2 text-sm text-gray-300">
+                <li><Link to="/auth" className="hover:text-white transition-colors">Upload Images</Link></li>
+                <li><Link to="/auth" className="hover:text-white transition-colors">View History</Link></li>
+                <li><Link to="#how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
+                <li><Link to="/auth" className="hover:text-white transition-colors">Get Started</Link></li>
+              </ul>
             </div>
+            
+            {/* Support Links */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Support</h3>
+              <ul className="space-y-2 text-sm text-gray-300">
+                <li><Link to="/auth" className="hover:text-white transition-colors">Get Started</Link></li>
+                <li><Link to="#how-it-works" className="hover:text-white transition-colors">Documentation</Link></li>
+                <li><Link to="/auth" className="hover:text-white transition-colors">Community</Link></li>
+                <li><Link to="/auth" className="hover:text-white transition-colors">Help Center</Link></li>
+              </ul>
+            </div>
+            
+            {/* Connect Section */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Connect</h3>
+              <p className="text-gray-300 text-sm">
+                Join our community of environmental researchers and activists.
+              </p>
+              <div className="flex items-center gap-3">
+                <a 
+                  href="mailto:sanidhyapatel49@gmail.com" 
+                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  title="Email us"
+                >
+                  <Mail className="h-5 w-5" />
+                </a>
+                <a 
+                  href="https://github.com/Sanidhya49/BinSavvy" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  title="GitHub"
+                >
+                  <Github className="h-5 w-5" />
+                </a>
+                <a 
+                  href="https://linkedin.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  title="LinkedIn"
+                >
+                  <Linkedin className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+            <p className="text-gray-400 text-sm">
+              © 2025 BinSavvy. All rights reserved. Building a cleaner world together.
+            </p>
           </div>
         </div>
       </footer>
