@@ -135,7 +135,7 @@ const AdminAnalysis = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
         {/* Original Image */}
         <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
@@ -199,22 +199,44 @@ const AdminAnalysis = () => {
                   </h3>
                 </div>
 
-                {/* Processed Image */}
-                {imageData.processed_image_url && (
-                  <div>
-                    <h4 className="font-medium mb-2">Processed Image</h4>
-                    <div className="aspect-video relative rounded-lg overflow-hidden">
-                      <img
-                        src={imageData.processed_image_url}
-                        alt="Processed waste image with detections"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = imageData.image_url;
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
+                                 {/* Processed Image */}
+                 {imageData.processed_image_url ? (
+                   <div>
+                     <h4 className="font-medium mb-2">Processed Image</h4>
+                     <div className="aspect-video relative rounded-lg overflow-hidden bg-gray-50">
+                       <img
+                         src={imageData.processed_image_url}
+                         alt="Processed waste image with detections"
+                         className="w-full h-full object-cover"
+                         onError={(e) => {
+                           console.log('Processed image failed to load, falling back to original');
+                           e.currentTarget.src = imageData.image_url;
+                         }}
+                         onLoad={() => {
+                           console.log('Processed image loaded successfully');
+                         }}
+                       />
+                       {imageData.processed_image_url === imageData.image_url && (
+                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-sm">
+                           <div className="text-center">
+                             <p>Processing in progress...</p>
+                             <p className="text-xs mt-1">Detection overlays will appear here</p>
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                 ) : (
+                   <div>
+                     <h4 className="font-medium mb-2">Processed Image</h4>
+                     <div className="aspect-video relative rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
+                       <div className="text-center text-gray-500">
+                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                         <p>Processing image...</p>
+                       </div>
+                     </div>
+                   </div>
+                 )}
 
                 {/* Analysis Details */}
                 <div className="space-y-3">
@@ -244,18 +266,21 @@ const AdminAnalysis = () => {
         </Card>
       </div>
 
-      {/* Mobile Actions */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t p-3">
-        <div className="flex gap-2">
-          <Button asChild className="flex-1">
-            <Link to="/admin/uploads">Back</Link>
-          </Button>
-          <Button variant="outline" className="flex-1">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-        </div>
-      </div>
+             {/* Mobile Actions */}
+       <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t p-3">
+         <div className="flex gap-2">
+           <Button asChild className="flex-1">
+             <Link to="/admin/uploads">Back</Link>
+           </Button>
+           <Button variant="outline" className="flex-1">
+             <Download className="h-4 w-4 mr-2" />
+             Export
+           </Button>
+         </div>
+       </div>
+       
+       {/* Mobile bottom padding to prevent content from being hidden behind fixed actions */}
+       <div className="sm:hidden h-20"></div>
     </div>
   );
 };

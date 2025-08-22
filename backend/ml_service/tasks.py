@@ -94,6 +94,27 @@ def create_processed_image_with_detections(image_path: str, predictions: list, c
                 draw.rectangle(label_bbox, fill='red')
                 draw.text((x1, y1 - 20), label, fill='white', font=font)
             
+            # If no detections found, add a text overlay to show processing was done
+            if not filtered_predictions:
+                # Add a semi-transparent overlay
+                overlay = Image.new('RGBA', img.size, (0, 0, 0, 100))
+                processed_img = Image.alpha_composite(processed_img.convert('RGBA'), overlay).convert('RGB')
+                draw = ImageDraw.Draw(processed_img)
+                
+                # Add text
+                text = "No garbage detected"
+                text_bbox = draw.textbbox((0, 0), text, font=font)
+                text_width = text_bbox[2] - text_bbox[0]
+                text_height = text_bbox[3] - text_bbox[1]
+                
+                # Center the text
+                x = (img_width - text_width) // 2
+                y = (img_height - text_height) // 2
+                
+                # Draw text background
+                draw.rectangle([x-10, y-10, x+text_width+10, y+text_height+10], fill='red')
+                draw.text((x, y), text, fill='white', font=font)
+            
             # Save processed image to temporary file
             temp_processed_path = tempfile.mktemp(suffix='.jpg')
             processed_img.save(temp_processed_path, 'JPEG', quality=95)
@@ -135,32 +156,28 @@ def process_image_with_roboflow_sync(image_id: str, image_url: str, location: st
         print(f"DEBUG: Total detections: {analysis_results.get('total_detections', 0)}")
         print(f"DEBUG: Predictions: {roboflow_result.get('predictions', [])}")
         
-        if analysis_results.get('total_detections', 0) > 0:
-            try:
-                print(f"DEBUG: Creating processed image with detections...")
-                # Create processed image with detection boxes
-                processed_image_path = create_processed_image_with_detections(
-                    temp_file_path, 
-                    roboflow_result.get('predictions', []), 
-                    confidence_threshold
-                )
+        try:
+            print(f"DEBUG: Creating processed image...")
+            # Always create a processed image, even if no detections
+            processed_image_path = create_processed_image_with_detections(
+                temp_file_path, 
+                roboflow_result.get('predictions', []), 
+                confidence_threshold
+            )
+            
+            print(f"DEBUG: Processed image created at: {processed_image_path}")
+            
+            # Upload processed image to Cloudinary
+            processed_image_url = upload_processed_image(processed_image_path, folder="binsavvy/processed")
+            print(f"DEBUG: Processed image uploaded to: {processed_image_url}")
+            
+            # Clean up temporary processed image
+            if processed_image_path != temp_file_path and os.path.exists(processed_image_path):
+                os.unlink(processed_image_path)
                 
-                print(f"DEBUG: Processed image created at: {processed_image_path}")
-                
-                # Upload processed image to Cloudinary
-                processed_image_url = upload_processed_image(processed_image_path, folder="binsavvy/processed")
-                print(f"DEBUG: Processed image uploaded to: {processed_image_url}")
-                
-                # Clean up temporary processed image
-                if processed_image_path != temp_file_path and os.path.exists(processed_image_path):
-                    os.unlink(processed_image_path)
-                    
-            except Exception as upload_error:
-                print(f"Error uploading processed image: {upload_error}")
-                # Fallback to original image
-                processed_image_url = image_url
-        else:
-            print(f"DEBUG: No detections found, using original image")
+        except Exception as upload_error:
+            print(f"Error uploading processed image: {upload_error}")
+            # Fallback to original image
             processed_image_url = image_url
         
         return {
