@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple test script to verify uploads work without ML processing
+Simple test script to verify uploads work without ML processing..
 """
 
 import os
