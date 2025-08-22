@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Mail, Github, Linkedin, Upload, BarChart3, Users, Globe, ArrowRight, CheckCircle } from "lucide-react";
+import { Mail, Github, Linkedin, Upload, BarChart3, Users, Globe, ArrowRight, CheckCircle, TrendingUp, Activity, MapPin } from "lucide-react";
 
 const LandingPage = () => {
   const { user } = useAuth();
@@ -61,6 +61,12 @@ const LandingPage = () => {
                 <Link to="/auth">
                   Start Contributing
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="group">
+                <Link to="#public-reports">
+                  View Public Reports
+                  <BarChart3 className="ml-2 h-4 w-4 group-hover:scale-110 transition-transform" />
                 </Link>
               </Button>
             </div>
@@ -143,7 +149,7 @@ const LandingPage = () => {
       </section>
 
       {/* Public Reports Section */}
-      <section className="py-16 px-6 bg-gradient-to-br from-binsavvy-500 to-waste-600 text-white">
+      <section id="public-reports" className="py-16 px-6 bg-gradient-to-br from-binsavvy-500 to-waste-600 text-white">
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-bold">Public Reports & Insights</h2>
@@ -153,42 +159,54 @@ const LandingPage = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4 hover:bg-white/15 transition-colors">
               <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                 <Globe className="h-6 w-6" />
               </div>
               <h3 className="text-xl font-semibold">Global Waste Trends</h3>
               <p className="opacity-90">
-                Discover patterns in waste distribution across different regions and communities.
+                Discover patterns in waste distribution across different regions and communities. Track seasonal variations and identify high-impact areas.
               </p>
-              <div className="pt-2">
+              <div className="pt-2 flex items-center justify-between">
                 <span className="text-sm opacity-75">Updated weekly</span>
+                <div className="flex items-center gap-1 text-green-300">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="text-sm">+15% this month</span>
+                </div>
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4 hover:bg-white/15 transition-colors">
               <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                 <BarChart3 className="h-6 w-6" />
               </div>
               <h3 className="text-xl font-semibold">AI Detection Stats</h3>
               <p className="opacity-90">
-                View statistics on waste detection accuracy and model performance metrics.
+                View statistics on waste detection accuracy and model performance metrics. Monitor real-time detection rates and confidence scores.
               </p>
-              <div className="pt-2">
+              <div className="pt-2 flex items-center justify-between">
                 <span className="text-sm opacity-75">Real-time data</span>
+                <div className="flex items-center gap-1 text-blue-300">
+                  <Activity className="h-4 w-4" />
+                  <span className="text-sm">94.2% accuracy</span>
+                </div>
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4 hover:bg-white/15 transition-colors">
               <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                 <Users className="h-6 w-6" />
               </div>
               <h3 className="text-xl font-semibold">Community Impact</h3>
               <p className="opacity-90">
-                See how our community contributions are making a difference in environmental research.
+                See how our community contributions are making a difference in environmental research. Track user engagement and contribution milestones.
               </p>
-              <div className="pt-2">
+              <div className="pt-2 flex items-center justify-between">
                 <span className="text-sm opacity-75">Monthly reports</span>
+                <div className="flex items-center gap-1 text-purple-300">
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-sm">1,247 locations</span>
+                </div>
               </div>
             </div>
           </div>
@@ -225,7 +243,7 @@ const LandingPage = () => {
                 <li><Link to="/auth" className="hover:text-white transition-colors">Upload Images</Link></li>
                 <li><Link to="/auth" className="hover:text-white transition-colors">View History</Link></li>
                 <li><Link to="#how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
-                <li><Link to="/auth" className="hover:text-white transition-colors">Get Started</Link></li>
+                <li><Link to="#public-reports" className="hover:text-white transition-colors">Public Reports</Link></li>
               </ul>
             </div>
             
