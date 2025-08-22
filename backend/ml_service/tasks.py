@@ -59,6 +59,7 @@ def create_processed_image_with_detections(image_path: str, predictions: list, c
             
             # Filter predictions by confidence threshold
             filtered_predictions = [p for p in predictions if p.get('confidence', 0) >= confidence_threshold]
+            print(f"DEBUG: Filtered predictions: {filtered_predictions}")
             
             # Draw detection boxes
             for prediction in filtered_predictions:
@@ -124,8 +125,12 @@ def process_image_with_roboflow(image_id: str, image_url: str, location: str = "
         
         # Create and upload processed image with detection overlays
         processed_image_url = None
+        print(f"DEBUG: Total detections: {analysis_results.get('total_detections', 0)}")
+        print(f"DEBUG: Predictions: {roboflow_result.get('predictions', [])}")
+        
         if analysis_results.get('total_detections', 0) > 0:
             try:
+                print(f"DEBUG: Creating processed image with detections...")
                 # Create processed image with detection boxes
                 processed_image_path = create_processed_image_with_detections(
                     temp_file_path, 
@@ -133,8 +138,11 @@ def process_image_with_roboflow(image_id: str, image_url: str, location: str = "
                     confidence_threshold
                 )
                 
+                print(f"DEBUG: Processed image created at: {processed_image_path}")
+                
                 # Upload processed image to Cloudinary
                 processed_image_url = upload_processed_image(processed_image_path, folder="binsavvy/processed")
+                print(f"DEBUG: Processed image uploaded to: {processed_image_url}")
                 
                 # Clean up temporary processed image
                 if processed_image_path != temp_file_path and os.path.exists(processed_image_path):
@@ -144,6 +152,9 @@ def process_image_with_roboflow(image_id: str, image_url: str, location: str = "
                 print(f"Error uploading processed image: {upload_error}")
                 # Fallback to original image
                 processed_image_url = image_url
+        else:
+            print(f"DEBUG: No detections found, using original image")
+            processed_image_url = image_url
         
         return {
             'image_id': image_id,
@@ -285,17 +296,10 @@ def process_image_with_yolo(image_id: str, image_url: str, location: str = "", c
                 if processed_image_path != temp_file_path and os.path.exists(processed_image_path):
                     os.unlink(processed_image_path)
                     
-            except Exception as upload_error:
-                print(f"Error uploading processed image: {upload_error}")
-                # Fallback to original image
-                processed_image_url = image_url
-        if len(detections) > 0:
-            try:
-                # For now, we'll use the original image as processed
-                # In a real implementation, you'd overlay detection boxes
-                processed_image_url = upload_processed_image(temp_file_path, folder="binsavvy/processed")
-            except Exception as upload_error:
-                print(f"Error uploading processed image: {upload_error}")
+                         except Exception as upload_error:
+                 print(f"Error uploading processed image: {upload_error}")
+                 # Fallback to original image
+                 processed_image_url = image_url
         
         return {
             'image_id': image_id,
