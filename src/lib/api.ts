@@ -3,6 +3,10 @@ import { authManager, makeAuthenticatedRequest } from './auth';
 // Read from Vite env in production, fallback to local dev
 export const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL || 'http://localhost:8000/api';
 
+// Debug: Log the API URL being used
+console.log('API_BASE_URL:', API_BASE_URL);
+console.log('VITE_API_URL env var:', (import.meta as any)?.env?.VITE_API_URL);
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
