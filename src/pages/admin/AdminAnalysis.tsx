@@ -220,11 +220,7 @@ const AdminAnalysis = () => {
                 <div className="space-y-3">
                   <h4 className="font-medium">Analysis Details</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                    {imageData.analysis_results.total_detections !== undefined && (
-                      <div>
-                        <strong>Total Detections:</strong> {imageData.analysis_results.total_detections}
-                      </div>
-                    )}
+                    
                     {imageData.analysis_results.average_confidence && (
                       <div>
                         <strong>Average Confidence:</strong> {(imageData.analysis_results.average_confidence * 100).toFixed(1)}%

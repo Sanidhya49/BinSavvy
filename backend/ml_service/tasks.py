@@ -7,6 +7,8 @@ import django
 from django.conf import settings
 from cloudinary_config import upload_processed_image
 from roboflow_config import roboflow_config
+from PIL import Image, ImageDraw, ImageFont
+import io
 
 # Configure Django settings for Celery tasks
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'binsavvy.settings')
@@ -25,6 +27,74 @@ def download_image_from_url(image_url: str) -> str:
     except Exception as e:
         print(f"Error downloading image from URL: {e}")
         raise e
+
+def create_processed_image_with_detections(image_path: str, predictions: list, confidence_threshold: float = 0.1) -> str:
+    """
+    Create a processed image with detection boxes and labels
+    
+    Args:
+        image_path: Path to the original image
+        predictions: List of predictions from ML model
+        confidence_threshold: Minimum confidence threshold
+    
+    Returns:
+        Path to the processed image file
+    """
+    try:
+        # Open the original image
+        with Image.open(image_path) as img:
+            # Convert to RGB if necessary
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            
+            # Create a copy for drawing
+            processed_img = img.copy()
+            draw = ImageDraw.Draw(processed_img)
+            
+            # Try to load a font, fallback to default if not available
+            try:
+                font = ImageFont.truetype("arial.ttf", 16)
+            except:
+                font = ImageFont.load_default()
+            
+            # Filter predictions by confidence threshold
+            filtered_predictions = [p for p in predictions if p.get('confidence', 0) >= confidence_threshold]
+            
+            # Draw detection boxes
+            for prediction in filtered_predictions:
+                # Extract bounding box coordinates
+                x = prediction.get('x', 0)
+                y = prediction.get('y', 0)
+                width = prediction.get('width', 0)
+                height = prediction.get('height', 0)
+                confidence = prediction.get('confidence', 0)
+                class_name = prediction.get('class', 'Garbage')
+                
+                # Calculate box coordinates
+                x1 = x - width / 2
+                y1 = y - height / 2
+                x2 = x + width / 2
+                y2 = y + height / 2
+                
+                # Draw rectangle
+                draw.rectangle([x1, y1, x2, y2], outline='red', width=3)
+                
+                # Draw label
+                label = f"{class_name} {confidence:.2f}"
+                label_bbox = draw.textbbox((x1, y1 - 20), label, font=font)
+                draw.rectangle(label_bbox, fill='red')
+                draw.text((x1, y1 - 20), label, fill='white', font=font)
+            
+            # Save processed image to temporary file
+            temp_processed_path = tempfile.mktemp(suffix='.jpg')
+            processed_img.save(temp_processed_path, 'JPEG', quality=95)
+            
+            return temp_processed_path
+            
+    except Exception as e:
+        print(f"Error creating processed image: {e}")
+        # Return original image path if processing fails
+        return image_path
 
 @shared_task
 def process_image_with_roboflow(image_id: str, image_url: str, location: str = "", confidence_threshold: float = 0.1, min_detection_size: int = 20, max_detections: int = 50):
@@ -52,15 +122,28 @@ def process_image_with_roboflow(image_id: str, image_url: str, location: str = "
         # Analyze predictions
         analysis_results = roboflow_config.analyze_predictions(roboflow_result)
         
-        # Upload processed image to Cloudinary if we have results
+        # Create and upload processed image with detection overlays
         processed_image_url = None
         if analysis_results.get('total_detections', 0) > 0:
             try:
-                # For now, we'll use the original image as processed
-                # In a real implementation, you'd overlay detection boxes
-                processed_image_url = upload_processed_image(temp_file_path, folder="binsavvy/processed")
+                # Create processed image with detection boxes
+                processed_image_path = create_processed_image_with_detections(
+                    temp_file_path, 
+                    roboflow_result.get('predictions', []), 
+                    confidence_threshold
+                )
+                
+                # Upload processed image to Cloudinary
+                processed_image_url = upload_processed_image(processed_image_path, folder="binsavvy/processed")
+                
+                # Clean up temporary processed image
+                if processed_image_path != temp_file_path and os.path.exists(processed_image_path):
+                    os.unlink(processed_image_path)
+                    
             except Exception as upload_error:
                 print(f"Error uploading processed image: {upload_error}")
+                # Fallback to original image
+                processed_image_url = image_url
         
         return {
             'image_id': image_id,
@@ -165,8 +248,47 @@ def process_image_with_yolo(image_id: str, image_url: str, location: str = "", c
             'message': f'Found {len(detections)} objects in image'
         }
         
-        # Upload processed image to Cloudinary if we have results
+        # Create and upload processed image with detection overlays
         processed_image_url = None
+        if len(detections) > 0:
+            try:
+                # Convert YOLO detections to the format expected by create_processed_image_with_detections
+                predictions = []
+                for detection in detections:
+                    bbox = detection['bbox']
+                    if len(bbox) == 4:
+                        x = (bbox[0] + bbox[2]) / 2  # center x
+                        y = (bbox[1] + bbox[3]) / 2  # center y
+                        width = bbox[2] - bbox[0]    # width
+                        height = bbox[3] - bbox[1]   # height
+                        
+                        predictions.append({
+                            'x': x,
+                            'y': y,
+                            'width': width,
+                            'height': height,
+                            'confidence': detection['confidence'],
+                            'class': 'Garbage'  # YOLO doesn't have specific waste classes
+                        })
+                
+                # Create processed image with detection boxes
+                processed_image_path = create_processed_image_with_detections(
+                    temp_file_path, 
+                    predictions, 
+                    confidence_threshold
+                )
+                
+                # Upload processed image to Cloudinary
+                processed_image_url = upload_processed_image(processed_image_path, folder="binsavvy/processed")
+                
+                # Clean up temporary processed image
+                if processed_image_path != temp_file_path and os.path.exists(processed_image_path):
+                    os.unlink(processed_image_path)
+                    
+            except Exception as upload_error:
+                print(f"Error uploading processed image: {upload_error}")
+                # Fallback to original image
+                processed_image_url = image_url
         if len(detections) > 0:
             try:
                 # For now, we'll use the original image as processed
