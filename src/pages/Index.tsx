@@ -12,7 +12,6 @@ import {
   Zap,
   CheckCircle,
   ArrowRight,
-  Play,
   Camera,
   MapPin,
   TrendingUp,
@@ -127,12 +126,6 @@ const Index = () => {
                   <Link to="/auth">
                     Start Contributing
                     <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="text-base md:text-lg px-6 md:px-8 py-5 md:py-6 hover:shadow w-full sm:w-auto">
-                  <Link to="#how-it-works">
-                    <Play className="mr-2 h-5 w-5" />
-                    Watch Demo
                   </Link>
                 </Button>
               </div>
@@ -336,7 +329,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="py-12 px-6 md:px-10 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <div className="bg-gradient-to-r from-green-500 to-blue-600 w-8 h-8 rounded-md flex items-center justify-center">
@@ -355,16 +348,6 @@ const Index = () => {
                 <li><Link to="/auth" className="hover:text-white transition-colors">Upload Images</Link></li>
                 <li><Link to="/auth" className="hover:text-white transition-colors">View History</Link></li>
                 <li><Link to="#how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
-              </ul>
-            </div>
-            
-            <div className="space-y-4">
-              <h3 className="font-semibold">Support</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link to="/auth" className="hover:text-white transition-colors">Get Started</Link></li>
-                <li><Link to="#how-it-works" className="hover:text-white transition-colors">Documentation</Link></li>
-                <li><Link to="/auth" className="hover:text-white transition-colors">Community</Link></li>
-                <li><Link to="/auth" className="hover:text-white transition-colors">Help Center</Link></li>
               </ul>
             </div>
             
