@@ -125,7 +125,7 @@ const Navbar = () => {
       
       {/* Mobile navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t py-6 px-6 bg-gradient-to-br from-green-50 via-emerald-50 to-blue-50">
+        <div className="md:hidden border-t py-6 px-6 bg-gradient-to-br from-green-50/60 via-emerald-50/40 to-blue-50/60">
           <nav className="flex flex-col space-y-4">
             {user?.role === "admin" ? (
               <>

@@ -89,7 +89,7 @@ const Index = () => {
               <Button variant="outline" asChild>
                 <Link to="/auth">Login</Link>
               </Button>
-              <Button asChild className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700">
+              <Button asChild className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600">
                 <Link to="/auth">Get Started</Link>
               </Button>
             </>
@@ -125,7 +125,7 @@ const Index = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                <Button asChild size="lg" className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 shadow-sm hover:shadow w-full sm:w-auto">
+                <Button asChild size="lg" className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 shadow-sm hover:shadow w-full sm:w-auto">
                   <Link to="/auth">
                     Start Contributing
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -318,7 +318,7 @@ const Index = () => {
             Every upload helps build a cleaner, more sustainable world.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-            <Button asChild size="lg" className="bg-white text-green-600 hover:bg-gray-100 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 shadow-sm hover:shadow w-full sm:w-auto">
+                          <Button asChild size="lg" className="bg-white text-green-500 hover:bg-gray-100 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 shadow-sm hover:shadow w-full sm:w-auto">
               <Link to="/auth">
                 Start Contributing Today
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -372,7 +372,7 @@ const Index = () => {
               <div className="flex items-center justify-center md:justify-start gap-4">
                 <a 
                   href="mailto:sanidhyapatel49@gmail.com" 
-                  className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center hover:from-green-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl hover:scale-110"
+                  className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center hover:from-green-500 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl hover:scale-110"
                   title="Email us"
                 >
                   <Mail className="h-6 w-6 text-white" />
@@ -381,7 +381,7 @@ const Index = () => {
                   href="https://github.com/Sanidhya49/BinSavvy" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center hover:from-green-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl hover:scale-110"
+                  className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center hover:from-green-500 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl hover:scale-110"
                   title="GitHub"
                 >
                   <Github className="h-6 w-6 text-white" />
@@ -390,7 +390,7 @@ const Index = () => {
                   href="https://linkedin.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center hover:from-green-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl hover:scale-110"
+                  className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center hover:from-green-500 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl hover:scale-110"
                   title="LinkedIn"
                 >
                   <Linkedin className="h-6 w-6 text-white" />

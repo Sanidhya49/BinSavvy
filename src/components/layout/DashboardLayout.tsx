@@ -73,7 +73,7 @@ const DashboardLayout = ({
   // Render the dashboard content
   console.log('DashboardLayout: Rendering dashboard content');
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-emerald-50 to-blue-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50/60 via-emerald-50/40 to-blue-50/60">
       <Navbar />
       <div className="flex-1 container py-4 md:py-6 lg:py-8 px-4 md:px-6">
         {children}
