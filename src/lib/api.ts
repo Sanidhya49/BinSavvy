@@ -175,6 +175,12 @@ class ApiClient {
     formData.append('skip_ml', skip_ml.toString());
     if (latitude !== undefined) formData.append('latitude', latitude.toString());
     if (longitude !== undefined) formData.append('longitude', longitude.toString());
+    
+    // Add user ID to the request
+    const user = authManager.getCurrentUser();
+    if (user?.id) {
+      formData.append('user_id', user.id);
+    }
 
     // Use XMLHttpRequest for upload progress if a callback is provided
     if (typeof onProgress === 'function') {
@@ -218,15 +224,21 @@ class ApiClient {
   }
 
   async getUserImages(): Promise<ApiResponse<ImageUpload[]>> {
-    return this.request('/images/list/');
+    const user = authManager.getCurrentUser();
+    const url = user?.id ? `/images/list/?user_id=${user.id}` : '/images/list/';
+    return this.request(url);
   }
 
   async getImageDetails(imageId: string): Promise<ApiResponse<ImageUpload>> {
-    return this.request(`/images/${imageId}/`);
+    const user = authManager.getCurrentUser();
+    const url = user?.id ? `/images/${imageId}/?user_id=${user.id}` : `/images/${imageId}/`;
+    return this.request(url);
   }
 
   async deleteImage(imageId: string): Promise<ApiResponse> {
-    return this.request(`/images/${imageId}/delete/`, {
+    const user = authManager.getCurrentUser();
+    const url = user?.id ? `/images/${imageId}/delete/?user_id=${user.id}` : `/images/${imageId}/delete/`;
+    return this.request(url, {
       method: 'DELETE',
     });
   }

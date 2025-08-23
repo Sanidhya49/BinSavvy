@@ -25,6 +25,31 @@ except Exception as e:
 # In-memory storage for demo (in production, this would be a database)
 uploaded_images = []
 
+# Migration function to add user_id to existing images (for backward compatibility)
+def migrate_existing_images():
+    """Add user_id to existing images that don't have it"""
+    for img in uploaded_images:
+        if 'user_id' not in img:
+            # Assign to admin user (user_id: '1') for existing images
+            img['user_id'] = '1'
+            print(f"Migrated image {img['image_id']} to admin user")
+
+# Helper function to get user ID from request
+def get_user_id_from_request(request):
+    """Extract user ID from request headers or query params"""
+    # Try to get from Authorization header first
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.startswith('Bearer '):
+        token = auth_header.split(' ')[1]
+        # For demo, extract user_id from token format: access_{user_id}_{timestamp}
+        if token.startswith('access_'):
+            parts = token.split('_')
+            if len(parts) >= 3:
+                return parts[1]
+    
+    # Fallback to query parameter
+    return request.GET.get('user_id') or request.data.get('user_id')
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):
@@ -48,6 +73,11 @@ def upload_image(request):
         use_roboflow = request.data.get('use_roboflow', 'true').lower() == 'true'
         skip_ml = request.data.get('skip_ml', 'false').lower() == 'true'
         
+        # Get user ID from request
+        user_id = get_user_id_from_request(request)
+        if not user_id:
+            return Response({'error': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
         if not image_file:
             return Response({'error': 'No image file provided'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -70,6 +100,7 @@ def upload_image(request):
         # Create initial image object with Cloudinary URL
         image_object = {
             'image_id': image_id,
+            'user_id': user_id,  # Add user ID for data isolation
             'image_url': cloudinary_result['url'],
             'cloudinary_public_id': cloudinary_result['public_id'],
             'location': location,
@@ -207,10 +238,23 @@ def upload_image(request):
 def get_user_images(request):
     """Get user images with ML results"""
     try:
-        # Return the actual uploaded images
+        # Get user ID from request
+        user_id = get_user_id_from_request(request)
+        
+        if not user_id:
+            return Response({'error': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Migrate existing images to add user_id
+        migrate_existing_images()
+        
+        # Filter images by user_id
+        user_images = [img for img in uploaded_images if img.get('user_id') == user_id]
+        
+        print(f"Returning {len(user_images)} images for user {user_id}")
+        
         return Response({
             'message': 'Images retrieved successfully',
-            'data': uploaded_images
+            'data': user_images
         })
         
     except Exception as e:
@@ -221,8 +265,14 @@ def get_user_images(request):
 def get_image_details(request, image_id):
     """Get image details with ML analysis"""
     try:
-        # Find the image by ID
-        image = next((img for img in uploaded_images if img['image_id'] == image_id), None)
+        # Get user ID from request
+        user_id = get_user_id_from_request(request)
+        
+        if not user_id:
+            return Response({'error': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Find the image by ID and check ownership
+        image = next((img for img in uploaded_images if img['image_id'] == image_id and img.get('user_id') == user_id), None)
         
         if not image:
             return Response({'error': 'Image not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -242,8 +292,14 @@ def delete_image(request, image_id):
     try:
         global uploaded_images
         
-        # Find the image before deleting
-        image_to_delete = next((img for img in uploaded_images if img['image_id'] == image_id), None)
+        # Get user ID from request
+        user_id = get_user_id_from_request(request)
+        
+        if not user_id:
+            return Response({'error': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Find the image before deleting and check ownership
+        image_to_delete = next((img for img in uploaded_images if img['image_id'] == image_id and img.get('user_id') == user_id), None)
         
         if not image_to_delete:
             return Response({'error': 'Image not found'}, status=status.HTTP_404_NOT_FOUND)

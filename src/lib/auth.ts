@@ -223,10 +223,22 @@ class AuthManager {
   }
 
   // Get current user info
-  getCurrentUser(): JWTPayload | null {
-    const token = this.getAccessToken();
-    if (!token) return null;
-    return this.getTokenPayload(token);
+  getCurrentUser(): any {
+    try {
+      // Try to get user from localStorage first (for full user data)
+      const storedUser = localStorage.getItem('demo_user');
+      if (storedUser) {
+        return JSON.parse(storedUser);
+      }
+      
+      // Fallback to token payload
+      const token = this.getAccessToken();
+      if (!token) return null;
+      return this.getTokenPayload(token);
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
   }
 
   // Check if user is authenticated

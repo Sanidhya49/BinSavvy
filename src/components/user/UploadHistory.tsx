@@ -52,6 +52,7 @@ export default function UploadHistory() {
   const [selectedImage, setSelectedImage] = useState<ImageUpload | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+  const [timeUpdate, setTimeUpdate] = useState<Date>(new Date());
 
   const fetchUploads = async () => {
     try {
@@ -124,6 +125,15 @@ export default function UploadHistory() {
     }
   }, [lastDataRefresh]);
 
+  // Update timestamps every minute to keep relative times current
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeUpdate(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, []);
+
   const getStatusBadge = (status: string, analysisResults?: AnalysisResults) => {
     const statusConfig = {
       pending: { variant: 'secondary' as const, text: 'Pending', icon: Clock },
@@ -162,7 +172,9 @@ export default function UploadHistory() {
 
   const formatDate = (dateString: string) => {
     try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+      // Use timeUpdate to force re-renders and keep timestamps current
+      const date = new Date(dateString);
+      return formatDistanceToNow(date, { addSuffix: true });
     } catch (error) {
       return 'Unknown date';
     }
@@ -258,6 +270,8 @@ export default function UploadHistory() {
                 <CardDescription className="flex items-center gap-1 text-xs">
                   <Calendar className="h-3 w-3" />
                   {formatDate(upload.uploaded_at)}
+                  {/* Force re-render when timeUpdate changes */}
+                  <span className="hidden">{timeUpdate.getTime()}</span>
                 </CardDescription>
               </CardHeader>
 
@@ -365,6 +379,8 @@ export default function UploadHistory() {
                   </div>
                   <div>
                     <strong>Uploaded:</strong> {formatDate(selectedImage.uploaded_at)}
+                    {/* Force re-render when timeUpdate changes */}
+                    <span className="hidden">{timeUpdate.getTime()}</span>
                   </div>
                   <div>
                     <strong>Status:</strong> {selectedImage.status}
