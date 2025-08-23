@@ -199,7 +199,7 @@ const AdminDashboard = () => {
           Admin Dashboard
         </h1>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-gradient-to-r from-green-50 to-blue-50 px-3 py-2 rounded-lg border border-green-200">
             <span>Auto refresh</span>
             <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
           </div>
@@ -249,65 +249,65 @@ const AdminDashboard = () => {
       
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-5">
-        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all bg-gradient-to-br from-green-50 to-blue-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Uploads</CardTitle>
-            <Upload className="h-4 w-4 text-muted-foreground" />
+            <Upload className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUploads}</div>
+            <div className="text-2xl font-bold text-green-700">{stats.totalUploads}</div>
             <p className="text-xs text-muted-foreground">
               Total images uploaded
             </p>
           </CardContent>
         </Card>
         
-        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all bg-gradient-to-br from-yellow-50 to-orange-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingAnalysis}</div>
+            <div className="text-2xl font-bold text-yellow-700">{stats.pendingAnalysis}</div>
             <p className="text-xs text-muted-foreground">
               Awaiting processing
             </p>
           </CardContent>
         </Card>
         
-        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all bg-gradient-to-br from-blue-50 to-purple-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Processed</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CheckCircle className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.processedImages}</div>
+            <div className="text-2xl font-bold text-blue-700">{stats.processedImages}</div>
             <p className="text-xs text-muted-foreground">
               Successfully analyzed
             </p>
           </CardContent>
         </Card>
         
-        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all bg-gradient-to-br from-red-50 to-pink-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Failed</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.failedUploads}</div>
+            <div className="text-2xl font-bold text-red-700">{stats.failedUploads}</div>
             <p className="text-xs text-muted-foreground">
               Processing errors
             </p>
           </CardContent>
         </Card>
         
-        <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all bg-gradient-to-br from-purple-50 to-indigo-50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Avg Time</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <BarChart3 className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageProcessingTime}s</div>
+            <div className="text-2xl font-bold text-purple-700">{stats.averageProcessingTime}s</div>
             <p className="text-xs text-muted-foreground">
               Processing time
             </p>

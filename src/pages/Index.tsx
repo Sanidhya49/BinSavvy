@@ -69,9 +69,14 @@ const Index = () => {
       </div>
       {/* Header */}
       <header ref={headerRef} className="landing-header py-3 md:py-4 px-4 md:px-10 flex items-center justify-between border-b border-transparent">
-        <div className="flex items-center gap-2">
-          <img src="/binsavvy_logo.png" alt="BinSavvy" className="h-8 md:h-10 w-auto" />
-          <span className="font-bold text-lg md:text-xl text-gray-900">BinSavvy</span>
+        <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-r from-green-500 to-blue-600 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg ring-2 ring-green-400/20">
+            <span className="text-white font-bold text-lg md:text-xl">BS</span>
+          </div>
+          <div>
+            <span className="font-bold text-xl md:text-2xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">BinSavvy</span>
+            <p className="text-xs text-gray-600 hidden md:block">Smart Waste Analysis</p>
+          </div>
         </div>
         
         <div className="flex items-center gap-3">
@@ -327,67 +332,79 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 md:px-10 bg-gray-900 text-white">
+      <footer className="py-12 px-6 md:px-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 text-center md:text-left">
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="bg-gradient-to-r from-green-500 to-blue-600 w-8 h-8 rounded-md flex items-center justify-center">
-                  <span className="text-white font-bold">BS</span>
+              <div className="flex items-center justify-center md:justify-start gap-3">
+                <div className="bg-gradient-to-r from-green-500 to-blue-600 w-14 h-14 rounded-full flex items-center justify-center shadow-xl ring-2 ring-green-400/20">
+                  <span className="text-white font-bold text-xl">BS</span>
                 </div>
-                <span className="font-bold text-xl">BinSavvy</span>
+                <div>
+                  <span className="font-bold text-2xl bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">BinSavvy</span>
+                  <p className="text-xs text-gray-400 mt-1">Smart Waste Analysis</p>
+                </div>
               </div>
-              <p className="text-gray-400">
-                Smart waste analysis platform powered by AI and community contributions.
+              <p className="text-gray-400 max-w-xs mx-auto md:mx-0 text-sm">
+                AI-powered waste analysis platform for environmental research and community impact.
               </p>
             </div>
             
             <div className="space-y-4">
-              <h3 className="font-semibold">Platform</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link to="/auth" className="hover:text-white transition-colors">Upload Images</Link></li>
-                <li><Link to="/auth" className="hover:text-white transition-colors">View History</Link></li>
-                <li><Link to="#how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
+              <h3 className="font-semibold text-lg">Platform</h3>
+              <ul className="space-y-3 text-gray-400">
+                <li><Link to="/auth" className="hover:text-green-400 transition-colors duration-200 flex items-center justify-center md:justify-start gap-2 group">
+                  <div className="w-1 h-1 bg-green-400 rounded-full group-hover:scale-150 transition-transform"></div>
+                  Upload Images
+                </Link></li>
+                <li><Link to="/auth" className="hover:text-green-400 transition-colors duration-200 flex items-center justify-center md:justify-start gap-2 group">
+                  <div className="w-1 h-1 bg-green-400 rounded-full group-hover:scale-150 transition-transform"></div>
+                  View History
+                </Link></li>
+                <li><Link to="#how-it-works" className="hover:text-green-400 transition-colors duration-200 flex items-center justify-center md:justify-start gap-2 group">
+                  <div className="w-1 h-1 bg-green-400 rounded-full group-hover:scale-150 transition-transform"></div>
+                  How It Works
+                </Link></li>
               </ul>
             </div>
             
             <div className="space-y-4">
-              <h3 className="font-semibold">Connect</h3>
-              <p className="text-gray-400">
+              <h3 className="font-semibold text-lg">Connect</h3>
+              <p className="text-gray-400 max-w-xs mx-auto md:mx-0 text-sm">
                 Join our community of environmental researchers and activists.
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center md:justify-start gap-4">
                 <a 
                   href="mailto:sanidhyapatel49@gmail.com" 
-                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center hover:from-green-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl hover:scale-110"
                   title="Email us"
                 >
-                  <Mail className="h-5 w-5" />
+                  <Mail className="h-6 w-6 text-white" />
                 </a>
                 <a 
                   href="https://github.com/Sanidhya49/BinSavvy" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center hover:from-green-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl hover:scale-110"
                   title="GitHub"
                 >
-                  <Github className="h-5 w-5" />
+                  <Github className="h-6 w-6 text-white" />
                 </a>
                 <a 
                   href="https://linkedin.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center hover:from-green-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl hover:scale-110"
                   title="LinkedIn"
                 >
-                  <Linkedin className="h-5 w-5" />
+                  <Linkedin className="h-6 w-6 text-white" />
                 </a>
               </div>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 BinSavvy. All rights reserved. Building a cleaner world together.</p>
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center">
+            <p className="text-gray-400 text-sm">&copy; 2025 BinSavvy. All rights reserved. Building a cleaner world together.</p>
           </div>
         </div>
       </footer>

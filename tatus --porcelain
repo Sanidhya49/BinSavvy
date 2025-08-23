@@ -1,0 +1,5 @@
+[33m546e4df[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Enhance landing page: add View Public Reports button, improve public reports section with detailed content and stats
+[33m6563b3c[m Fix auth page: change to Back to Home button and remove unused import
+[33m7385861[m Update landing page: remove demo button, add public reports section, improve footer, add back to dashboard button on auth page
+[33mbc6f4d0[m branch check
+[33maec4f34[m roboflow API changes

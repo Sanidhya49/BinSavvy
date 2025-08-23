@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -35,9 +36,14 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
-          <Link to="/" className="flex items-center space-x-2 group">
-            <img src="/binsavvy_logo.png" alt="BinSavvy" className="h-8 w-auto transition-transform group-hover:scale-[1.03]" />
-            <span className="font-bold text-xl hidden md:block">BinSavvy</span>
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="bg-gradient-to-r from-green-500 to-blue-600 w-10 h-10 rounded-full flex items-center justify-center shadow-lg ring-2 ring-green-400/20 transition-transform group-hover:scale-[1.03]">
+              <span className="text-white font-bold text-lg">BS</span>
+            </div>
+            <div className="hidden md:block">
+              <span className="font-bold text-xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">BinSavvy</span>
+              <p className="text-xs text-muted-foreground">Smart Waste Analysis</p>
+            </div>
           </Link>
         </div>
         
@@ -77,9 +83,9 @@ const Navbar = () => {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                  <div className="bg-binsavvy-200 text-binsavvy-700 rounded-full w-9 h-9 flex items-center justify-center">
-                    {getUserInitials()}
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+                  <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-full w-10 h-10 flex items-center justify-center shadow-lg ring-2 ring-green-400/20 hover:ring-green-400/40 transition-all">
+                    <span className="text-white font-bold text-lg">{getUserInitials()}</span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -107,76 +113,72 @@ const Navbar = () => {
           
           {/* Mobile menu button */}
           <button
-            className="md:hidden"
+            className="md:hidden p-2.5 rounded-xl bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              {isMobileMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5 text-white" />
+            ) : (
+              <Menu className="h-5 w-5 text-white" />
+            )}
           </button>
         </div>
       </div>
       
       {/* Mobile navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t py-4 px-6 bg-background">
-          <nav className="flex flex-col space-y-3">
+        <div className="md:hidden border-t py-6 px-6 bg-gradient-to-br from-green-50 via-emerald-50 to-blue-50">
+          <nav className="flex flex-col space-y-4">
             {user?.role === "admin" ? (
               <>
                 <Link 
                   to="/admin" 
-                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/admin") && "text-foreground")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link 
                   to="/admin/uploads" 
-                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/admin/uploads") && "text-foreground")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin/uploads") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   User Uploads
+                </Link>
+                <Link 
+                  to="/admin/analytics" 
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin/analytics") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Analytics
+                </Link>
+                <Link 
+                  to="/admin/ml-processor" 
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin/ml-processor") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  ML Processor
                 </Link>
               </>
             ) : (
               <>
                 <Link 
                   to="/dashboard" 
-                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/dashboard") && "text-foreground")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/dashboard") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link 
                   to="/upload" 
-                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/upload") && "text-foreground")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/upload") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Upload
                 </Link>
                 <Link 
                   to="/history" 
-                  className={cn("text-sm font-medium py-2 px-1 rounded-md hover:bg-accent", isActive("/history") && "text-foreground")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/history") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   History
