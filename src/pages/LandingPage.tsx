@@ -98,7 +98,11 @@ const LandingPage = () => {
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-64 h-64 border-4 border-binsavvy-500/30 rounded-full flex items-center justify-center">
-                <span className="text-5xl font-bold text-binsavvy-700">BinSavvy</span>
+                <div className="w-48 h-48 bg-gradient-to-br from-binsavvy-500/40 to-waste-600/40 rounded-full flex items-center justify-center">
+                  <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center">
+                    <Upload className="h-16 w-16 text-white/60" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -106,43 +110,43 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 px-6 bg-muted/20">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="text-center space-y-2 mb-12">
-            <h2 className="text-3xl font-bold">How It Works</h2>
-            <p className="text-xl text-muted-foreground">
-              Join our community effort to analyze and combat waste
+      <section id="how-it-works" className="py-16 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl md:text-4xl font-bold">How It Works</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Simple steps to contribute to environmental research and waste management
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-background rounded-lg p-6 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-16 h-16 bg-binsavvy-100 rounded-full flex items-center justify-center mx-auto">
-                <Upload className="h-8 w-8 text-binsavvy-600" />
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-binsavvy-500 to-waste-600 rounded-full flex items-center justify-center mx-auto">
+                <Upload className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-medium">Upload Images</h3>
+              <h3 className="text-xl font-semibold">Upload Images</h3>
               <p className="text-muted-foreground">
-                Capture and upload photos of waste in your surroundings with location information.
+                Take photos or upload existing images of waste areas using your camera or device
               </p>
             </div>
             
-            <div className="bg-background rounded-lg p-6 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-16 h-16 bg-waste-100 rounded-full flex items-center justify-center mx-auto">
-                <BarChart3 className="h-8 w-8 text-waste-600" />
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-binsavvy-500 to-waste-600 rounded-full flex items-center justify-center mx-auto">
+                <BarChart3 className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-medium">AI Analysis</h3>
+              <h3 className="text-xl font-semibold">AI Analysis</h3>
               <p className="text-muted-foreground">
-                Our machine learning models analyze the images to identify and categorize waste objects.
+                Our advanced AI instantly analyzes the images and identifies waste types and locations
               </p>
             </div>
             
-            <div className="bg-background rounded-lg p-6 text-center space-y-4 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-16 h-16 bg-binsavvy-100 rounded-full flex items-center justify-center mx-auto">
-                <Users className="h-8 w-8 text-binsavvy-600" />
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-binsavvy-500 to-waste-600 rounded-full flex items-center justify-center mx-auto">
+                <Globe className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-medium">Community Impact</h3>
+              <h3 className="text-xl font-semibold">Contribute to Research</h3>
               <p className="text-muted-foreground">
-                Contribute to environmental research and help develop better waste management solutions.
+                Help build a comprehensive database for environmental research and waste management
               </p>
             </div>
           </div>
