@@ -346,18 +346,18 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-4 md:text-center">
               <h3 className="font-semibold text-lg">Platform</h3>
               <ul className="space-y-3 text-gray-400">
-                <li><Link to="/auth" className="hover:text-green-400 transition-colors duration-200 flex items-center justify-center md:justify-start gap-2 group">
+                <li><Link to="/auth" className="hover:text-green-400 transition-colors duration-200 flex items-center justify-center gap-2 group">
                   <div className="w-1 h-1 bg-green-400 rounded-full group-hover:scale-150 transition-transform"></div>
                   Upload Images
                 </Link></li>
-                <li><Link to="/auth" className="hover:text-green-400 transition-colors duration-200 flex items-center justify-center md:justify-start gap-2 group">
+                <li><Link to="/auth" className="hover:text-green-400 transition-colors duration-200 flex items-center justify-center gap-2 group">
                   <div className="w-1 h-1 bg-green-400 rounded-full group-hover:scale-150 transition-transform"></div>
                   View History
                 </Link></li>
-                <li><Link to="#how-it-works" className="hover:text-green-400 transition-colors duration-200 flex items-center justify-center md:justify-start gap-2 group">
+                <li><Link to="#how-it-works" className="hover:text-green-400 transition-colors duration-200 flex items-center justify-center gap-2 group">
                   <div className="w-1 h-1 bg-green-400 rounded-full group-hover:scale-150 transition-transform"></div>
                   How It Works
                 </Link></li>
