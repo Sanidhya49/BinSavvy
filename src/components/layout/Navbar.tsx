@@ -37,9 +37,7 @@ const Navbar = () => {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="bg-gradient-to-r from-green-500 to-blue-600 w-10 h-10 rounded-full flex items-center justify-center shadow-lg ring-2 ring-green-400/20 transition-transform group-hover:scale-[1.03]">
-              <span className="text-white font-bold text-lg">BS</span>
-            </div>
+            <img src="/binsavvy_logo.png" alt="BinSavvy" className="h-10 w-10 object-contain transition-transform group-hover:scale-[1.03]" />
             <div className="hidden md:block">
               <span className="font-bold text-xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">BinSavvy</span>
               <p className="text-xs text-muted-foreground">Smart Waste Analysis</p>
@@ -84,7 +82,7 @@ const Navbar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-                  <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-full w-10 h-10 flex items-center justify-center shadow-lg ring-2 ring-green-400/20 hover:ring-green-400/40 transition-all">
+                  <div className="bg-gradient-to-r from-green-400 to-blue-500 rounded-full w-10 h-10 flex items-center justify-center shadow-lg ring-2 ring-green-300/30 hover:ring-green-300/50 transition-all">
                     <span className="text-white font-bold text-lg">{getUserInitials()}</span>
                   </div>
                 </Button>
@@ -113,7 +111,7 @@ const Navbar = () => {
           
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2.5 rounded-xl bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
+            className="md:hidden p-2.5 rounded-xl bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? (
@@ -133,28 +131,28 @@ const Navbar = () => {
               <>
                 <Link 
                   to="/admin" 
-                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin") && "bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link 
                   to="/admin/uploads" 
-                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin/uploads") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin/uploads") && "bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   User Uploads
                 </Link>
                 <Link 
                   to="/admin/analytics" 
-                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin/analytics") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin/analytics") && "bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Analytics
                 </Link>
                 <Link 
                   to="/admin/ml-processor" 
-                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin/ml-processor") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/admin/ml-processor") && "bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   ML Processor
@@ -164,21 +162,21 @@ const Navbar = () => {
               <>
                 <Link 
                   to="/dashboard" 
-                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/dashboard") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/dashboard") && "bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link 
                   to="/upload" 
-                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/upload") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/upload") && "bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Upload
                 </Link>
                 <Link 
                   to="/history" 
-                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/history") && "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg")}
+                  className={cn("text-sm font-medium py-4 px-6 rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 transition-all shadow-sm", isActive("/history") && "bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg")}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   History

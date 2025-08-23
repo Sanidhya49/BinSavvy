@@ -496,9 +496,9 @@ const UploadForm = () => {
   };
 
   return (
-    <Card className="w-full sm:max-w-2xl mx-auto border-0 shadow-sm hover:shadow-md transition-shadow px-3 sm:px-0">
+    <Card className="w-full sm:max-w-2xl mx-auto border-0 shadow-sm hover:shadow-md transition-shadow px-4 sm:px-0 bg-gradient-to-br from-green-50 via-emerald-50 to-blue-50">
       <CardHeader>
-        <CardTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Upload Waste Image</CardTitle>
+        <CardTitle className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent text-xl sm:text-2xl">Upload Waste Image</CardTitle>
         <CardDescription>
           Upload photos of waste in your surroundings to help us analyze and address waste management issues. 
           Your uploads will be automatically processed using our ML models.
@@ -546,9 +546,8 @@ const UploadForm = () => {
                 <div className="flex gap-2">
                   <Button 
                     type="button" 
-                    variant="outline" 
+                    className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
                     onClick={openCamera} 
-                    className="text-xs hover:shadow w-full sm:w-auto"
                   >
                     {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
                       ? "📷 Take Photo" 
@@ -643,7 +642,7 @@ const UploadForm = () => {
         <CardFooter>
           <Button
             type="submit"
-            className="w-full button-gradient"
+            className="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all"
             disabled={loading || items.length===0}
           >
             {loading ? (
@@ -671,7 +670,7 @@ const UploadForm = () => {
             {uploadProgress !== null && (
               <div className="mb-2">
                 <div className="h-1.5 w-full bg-gray-200 rounded overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-green-500 to-blue-600" style={{ width: `${Math.min(100, Math.max(0, uploadProgress))}%` }} />
+                  <div className="h-full bg-gradient-to-r from-green-400 to-blue-500" style={{ width: `${Math.min(100, Math.max(0, uploadProgress))}%` }} />
                 </div>
                 <div className="mt-1 flex justify-between">
                   <span>Uploading…</span>

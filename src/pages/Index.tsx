@@ -70,9 +70,7 @@ const Index = () => {
       {/* Header */}
       <header ref={headerRef} className="landing-header py-3 md:py-4 px-4 md:px-10 flex items-center justify-between border-b border-transparent">
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-r from-green-500 to-blue-600 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg ring-2 ring-green-400/20">
-            <span className="text-white font-bold text-lg md:text-xl">BS</span>
-          </div>
+          <img src="/binsavvy_logo.png" alt="BinSavvy" className="h-10 w-10 md:h-12 md:w-12 object-contain" />
           <div>
             <span className="font-bold text-xl md:text-2xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">BinSavvy</span>
             <p className="text-xs text-gray-600 hidden md:block">Smart Waste Analysis</p>
@@ -337,9 +335,7 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-8 text-center md:text-left">
             <div className="space-y-4">
               <div className="flex items-center justify-center md:justify-start gap-3">
-                <div className="bg-gradient-to-r from-green-500 to-blue-600 w-14 h-14 rounded-full flex items-center justify-center shadow-xl ring-2 ring-green-400/20">
-                  <span className="text-white font-bold text-xl">BS</span>
-                </div>
+                <img src="/binsavvy_logo.png" alt="BinSavvy" className="h-14 w-14 object-contain" />
                 <div>
                   <span className="font-bold text-2xl bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">BinSavvy</span>
                   <p className="text-xs text-gray-400 mt-1">Smart Waste Analysis</p>
