@@ -16,7 +16,6 @@ import {
   Camera,
   MapPin,
   TrendingUp,
-  Activity,
   Mail,
   Github,
   Linkedin
@@ -131,9 +130,9 @@ const Index = () => {
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="text-base md:text-lg px-6 md:px-8 py-5 md:py-6 hover:shadow w-full sm:w-auto">
-                  <Link to="#public-reports">
-                    <BarChart3 className="mr-2 h-5 w-5" />
-                    View Public Reports
+                  <Link to="#how-it-works">
+                    <Play className="mr-2 h-5 w-5" />
+                    Watch Demo
                   </Link>
                 </Button>
               </div>
@@ -184,8 +183,8 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold mb-4">Easy Upload</h3>
               <p className="text-gray-600">
-                Simply upload photos of waste areas using your camera or device. 
-                Our platform supports multiple image formats and sizes.
+                Simply take a photo and upload. Our AI instantly analyzes the waste 
+                and provides detailed insights about what you've found.
               </p>
             </div>
             
@@ -195,30 +194,19 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold mb-4">AI Analysis</h3>
               <p className="text-gray-600">
-                Advanced machine learning models instantly analyze your images 
-                to identify and categorize waste objects with high accuracy.
-              </p>
-            </div>
-            
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 md:p-8 border border-emerald-200 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-6">
-                <Globe className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Global Impact</h3>
-              <p className="text-gray-600">
-                Contribute to environmental research and help develop better 
-                waste management solutions for communities worldwide.
+                Advanced machine learning models identify waste types, materials, 
+                and provide environmental impact assessments in real-time.
               </p>
             </div>
             
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 md:p-8 border border-purple-200 hover:shadow-md transition-shadow">
               <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-6">
-                <Shield className="h-6 w-6 text-white" />
+                <MapPin className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-4">Privacy First</h3>
+              <h3 className="text-xl font-semibold mb-4">Location Tracking</h3>
               <p className="text-gray-600">
-                Your data is protected with enterprise-grade security. 
-                We only use anonymized data for research purposes.
+                GPS-enabled tracking helps identify waste hotspots and enables 
+                targeted cleanup efforts in your community.
               </p>
             </div>
             
@@ -226,94 +214,121 @@ const Index = () => {
               <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mb-6">
                 <Users className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-4">Community Driven</h3>
+              <h3 className="text-xl font-semibold mb-4">Community Impact</h3>
               <p className="text-gray-600">
-                Join thousands of users contributing to environmental research. 
-                Every upload helps build a cleaner, more sustainable world.
+                Join thousands of users contributing to a global database of 
+                waste patterns and environmental insights.
               </p>
             </div>
             
             <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-6 md:p-8 border border-teal-200 hover:shadow-md transition-shadow">
               <div className="w-12 h-12 bg-teal-500 rounded-lg flex items-center justify-center mb-6">
-                <Camera className="h-6 w-6 text-white" />
+                <Shield className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-4">Real-time Results</h3>
+              <h3 className="text-xl font-semibold mb-4">Privacy First</h3>
               <p className="text-gray-600">
-                View your contribution to environmental research and see 
-                how your data helps improve waste management.
+                Your data is secure and anonymous. We focus on environmental 
+                insights while protecting your privacy.
+              </p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 md:p-8 border border-indigo-200 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-indigo-500 rounded-lg flex items-center justify-center mb-6">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">Global Impact</h3>
+              <p className="text-gray-600">
+                Contribute to worldwide environmental research and help shape 
+                policies for a cleaner planet.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Public Reports Section */}
-      <section id="public-reports" className="py-16 md:py-20 px-4 md:px-10 bg-gradient-to-r from-green-600 to-blue-600 text-white reveal">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold">Public Reports & Insights</h2>
-            <p className="text-lg md:text-xl opacity-90 max-w-3xl mx-auto">
-              Explore our community-driven waste analysis reports and environmental insights
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-16 md:py-20 px-4 md:px-10 bg-gray-50 reveal">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
+              How It Works
+            </h2>
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+              Three simple steps to contribute to environmental research and 
+              help build a cleaner world.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 md:p-8 space-y-4 hover:bg-white/15 transition-colors">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                <Globe className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold">Global Waste Trends</h3>
-              <p className="opacity-90">
-                Discover patterns in waste distribution across different regions and communities. Track seasonal variations and identify high-impact areas.
-              </p>
-              <div className="pt-2 flex items-center justify-between">
-                <span className="text-sm opacity-75">Updated weekly</span>
-                <div className="flex items-center gap-1 text-green-300">
-                  <TrendingUp className="h-4 w-4" />
-                  <span className="text-sm">+15% this month</span>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center space-y-6 p-4 rounded-xl hover:shadow-md transition-all hover:-translate-y-0.5 bg-white/60">
+              <div className="relative inline-block">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto text-white shadow-md transition-transform duration-300 hover:scale-105">
+                  <Camera className="h-7 w-7" />
                 </div>
+                <span className="absolute -top-2 -left-2 text-xs font-semibold bg-white text-gray-800 px-2 py-0.5 rounded-full shadow ring-1 ring-black/5">01</span>
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-xl font-semibold">Capture & Upload</h3>
+                <p className="text-gray-600">
+                  Take a photo of waste in your surroundings and upload it 
+                  through our simple interface.
+                </p>
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 md:p-8 space-y-4 hover:bg-white/15 transition-colors">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                <BarChart3 className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold">AI Detection Stats</h3>
-              <p className="opacity-90">
-                View statistics on waste detection accuracy and model performance metrics. Monitor real-time detection rates and confidence scores.
-              </p>
-              <div className="pt-2 flex items-center justify-between">
-                <span className="text-sm opacity-75">Real-time data</span>
-                <div className="flex items-center gap-1 text-blue-300">
-                  <Activity className="h-4 w-4" />
-                  <span className="text-sm">94.2% accuracy</span>
+            <div className="text-center space-y-6 p-4 rounded-xl hover:shadow-md transition-all hover:-translate-y-0.5 bg-white/60">
+              <div className="relative inline-block">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto text-white shadow-md transition-transform duration-300 hover:scale-105">
+                  <Zap className="h-7 w-7" />
                 </div>
+                <span className="absolute -top-2 -left-2 text-xs font-semibold bg-white text-gray-800 px-2 py-0.5 rounded-full shadow ring-1 ring-black/5">02</span>
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-xl font-semibold">AI Analysis</h3>
+                <p className="text-gray-600">
+                  Our advanced AI instantly analyzes the image, identifies 
+                  waste types, and provides detailed insights.
+                </p>
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 md:p-8 space-y-4 hover:bg-white/15 transition-colors">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold">Community Impact</h3>
-              <p className="opacity-90">
-                See how our community contributions are making a difference in environmental research. Track user engagement and contribution milestones.
-              </p>
-              <div className="pt-2 flex items-center justify-between">
-                <span className="text-sm opacity-75">Monthly reports</span>
-                <div className="flex items-center gap-1 text-purple-300">
-                  <MapPin className="h-4 w-4" />
-                  <span className="text-sm">1,247 locations</span>
+            <div className="text-center space-y-6 p-4 rounded-xl hover:shadow-md transition-all hover:-translate-y-0.5 bg-white/60">
+              <div className="relative inline-block">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto text-white shadow-md transition-transform duration-300 hover:scale-105">
+                  <TrendingUp className="h-7 w-7" />
                 </div>
+                <span className="absolute -top-2 -left-2 text-xs font-semibold bg-white text-gray-800 px-2 py-0.5 rounded-full shadow ring-1 ring-black/5">03</span>
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-xl font-semibold">Track Impact</h3>
+                <p className="text-gray-600">
+                  View your contribution to environmental research and see 
+                  how your data helps improve waste management.
+                </p>
               </div>
             </div>
           </div>
-          
-          <div className="text-center pt-8">
-            <Button asChild size="lg" variant="outline" className="bg-white hover:bg-white/90 text-green-700 text-base md:text-lg px-6 md:px-8 py-5 md:py-6">
-              <Link to="/auth">Start Contributing Today</Link>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 md:py-20 px-4 md:px-10 bg-gradient-to-r from-green-600 to-blue-600 reveal">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-white">
+            Ready to Make a Difference?
+          </h2>
+          <p className="text-lg md:text-xl text-green-100">
+            Join thousands of users already contributing to environmental research. 
+            Every upload helps build a cleaner, more sustainable world.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+            <Button asChild size="lg" className="bg-white text-green-600 hover:bg-gray-100 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 shadow-sm hover:shadow w-full sm:w-auto">
+              <Link to="/auth">
+                Start Contributing Today
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
+
           </div>
         </div>
       </section>
@@ -340,7 +355,6 @@ const Index = () => {
                 <li><Link to="/auth" className="hover:text-white transition-colors">Upload Images</Link></li>
                 <li><Link to="/auth" className="hover:text-white transition-colors">View History</Link></li>
                 <li><Link to="#how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
-                <li><Link to="#public-reports" className="hover:text-white transition-colors">Public Reports</Link></li>
               </ul>
             </div>
             
