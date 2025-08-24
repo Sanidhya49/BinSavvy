@@ -162,9 +162,10 @@ const UploadForm = () => {
       // On mobile, use the file input with camera capture
       const fileInput = document.getElementById('image-upload') as HTMLInputElement;
       if (fileInput) {
+        // Set capture attribute to open camera directly
         fileInput.setAttribute('capture', 'environment');
         fileInput.click();
-        // Reset capture attribute after click
+        // Reset capture attribute after click to allow gallery selection next time
         setTimeout(() => {
           fileInput.removeAttribute('capture');
         }, 100);
@@ -540,7 +541,6 @@ const UploadForm = () => {
                     multiple
                     onChange={handleFileChange}
                     className="cursor-pointer"
-                    capture="environment"
                   />
                 </div>
                 <div className="flex gap-2">

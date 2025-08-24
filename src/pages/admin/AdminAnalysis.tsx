@@ -80,9 +80,9 @@ const AdminAnalysis = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4 sm:p-6">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="container mx-auto p-3 sm:p-6">
+        <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px]">
+          <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary"></div>
         </div>
       </div>
     );
@@ -90,12 +90,12 @@ const AdminAnalysis = () => {
 
   if (error || !imageData) {
     return (
-      <div className="container mx-auto p-4 sm:p-6">
-        <div className="text-center py-8">
-          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Error Loading Analysis</h2>
-          <p className="text-muted-foreground mb-4">{error || 'Image not found'}</p>
-          <Button asChild>
+      <div className="container mx-auto p-3 sm:p-6">
+        <div className="text-center py-6 sm:py-8">
+          <AlertTriangle className="h-8 w-8 sm:h-12 sm:w-12 text-red-500 mx-auto mb-3 sm:mb-4" />
+          <h2 className="text-lg sm:text-xl font-semibold mb-2">Error Loading Analysis</h2>
+          <p className="text-muted-foreground mb-4 text-sm sm:text-base">{error || 'Image not found'}</p>
+          <Button asChild className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white border-0">
             <Link to="/admin/uploads">Back to Uploads</Link>
           </Button>
         </div>
@@ -106,46 +106,39 @@ const AdminAnalysis = () => {
   const detectionStatus = getDetectionStatus(imageData.analysis_results);
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6">
+    <div className="container mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" asChild>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" asChild className="hidden sm:flex">
             <Link to="/admin/uploads">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Uploads
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Image Analysis
             </h1>
-            <p className="text-sm text-muted-foreground">Detailed analysis results</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Detailed analysis results</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-          <Button variant="outline" size="sm">
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
+        <div className="hidden sm:flex gap-2">
+          {/* Export and Share buttons removed - not functional */}
         </div>
       </div>
 
-             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         {/* Original Image */}
         <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
               Original Image
             </CardTitle>
-            <CardDescription>Uploaded image before processing</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Uploaded image before processing</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="aspect-video relative rounded-lg overflow-hidden">
               <img
                 src={imageData.image_url}
@@ -160,18 +153,18 @@ const AdminAnalysis = () => {
               </div>
             </div>
             
-            <div className="mt-4 space-y-2 text-sm">
+            <div className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 <span><strong>Location:</strong> {imageData.location || 'Unknown'}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 <span><strong>Uploaded:</strong> {formatDate(imageData.uploaded_at)}</span>
               </div>
               {imageData.latitude && imageData.longitude && (
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                   <span><strong>GPS:</strong> {imageData.latitude.toFixed(4)}, {imageData.longitude.toFixed(4)}</span>
                 </div>
               )}
@@ -181,75 +174,75 @@ const AdminAnalysis = () => {
 
         {/* Analysis Results */}
         <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
               Analysis Results
             </CardTitle>
-            <CardDescription>ML model detection results</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">ML model detection results</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {imageData.analysis_results ? (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Detection Status */}
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <detectionStatus.icon className={`h-8 w-8 mx-auto mb-2 ${detectionStatus.color}`} />
-                  <h3 className={`text-lg font-semibold ${detectionStatus.color}`}>
+                <div className="text-center p-3 sm:p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-100">
+                  <detectionStatus.icon className={`h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 ${detectionStatus.color}`} />
+                  <h3 className={`text-base sm:text-lg font-semibold ${detectionStatus.color}`}>
                     {detectionStatus.text}
                   </h3>
                 </div>
 
-                                 {/* Processed Image */}
-                 {imageData.processed_image_url ? (
-                   <div>
-                     <h4 className="font-medium mb-2">Processed Image</h4>
-                     <div className="aspect-video relative rounded-lg overflow-hidden bg-gray-50">
-                       <img
-                         src={imageData.processed_image_url}
-                         alt="Processed waste image with detections"
-                         className="w-full h-full object-cover"
-                         onError={(e) => {
-                           console.log('Processed image failed to load, falling back to original');
-                           e.currentTarget.src = imageData.image_url;
-                         }}
-                         onLoad={() => {
-                           console.log('Processed image loaded successfully');
-                         }}
-                       />
-                       {imageData.processed_image_url === imageData.image_url && (
-                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-sm">
-                           <div className="text-center">
-                             <p>Processing in progress...</p>
-                             <p className="text-xs mt-1">Detection overlays will appear here</p>
-                           </div>
-                         </div>
-                       )}
-                     </div>
-                   </div>
-                 ) : (
-                   <div>
-                     <h4 className="font-medium mb-2">Processed Image</h4>
-                     <div className="aspect-video relative rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
-                       <div className="text-center text-gray-500">
-                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                         <p>Processing image...</p>
-                       </div>
-                     </div>
-                   </div>
-                 )}
+                {/* Processed Image */}
+                {imageData.processed_image_url ? (
+                  <div>
+                    <h4 className="font-medium mb-2 text-sm sm:text-base">Processed Image</h4>
+                    <div className="aspect-video relative rounded-lg overflow-hidden bg-gradient-to-r from-green-50 to-blue-50 border border-green-100">
+                      <img
+                        src={imageData.processed_image_url}
+                        alt="Processed waste image with detections"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.log('Processed image failed to load, falling back to original');
+                          e.currentTarget.src = imageData.image_url;
+                        }}
+                        onLoad={() => {
+                          console.log('Processed image loaded successfully');
+                        }}
+                      />
+                      {imageData.processed_image_url === imageData.image_url && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-xs sm:text-sm">
+                          <div className="text-center">
+                            <p>Processing in progress...</p>
+                            <p className="text-xs mt-1">Detection overlays will appear here</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <h4 className="font-medium mb-2 text-sm sm:text-base">Processed Image</h4>
+                    <div className="aspect-video relative rounded-lg overflow-hidden bg-gradient-to-r from-green-50 to-blue-50 border border-green-100 flex items-center justify-center">
+                      <div className="text-center text-gray-500">
+                        <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                        <p className="text-xs sm:text-sm">Processing image...</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Analysis Details */}
-                <div className="space-y-3">
-                  <h4 className="font-medium">Analysis Details</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="space-y-2 sm:space-y-3">
+                  <h4 className="font-medium text-sm sm:text-base">Analysis Details</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
                     
                     {imageData.analysis_results.average_confidence && (
-                      <div>
+                      <div className="p-2 bg-gray-50 rounded">
                         <strong>Average Confidence:</strong> {(imageData.analysis_results.average_confidence * 100).toFixed(1)}%
                       </div>
                     )}
                     {imageData.analysis_results.message && (
-                      <div className="col-span-2">
+                      <div className="col-span-1 sm:col-span-2 p-2 bg-gray-50 rounded">
                         <strong>Message:</strong> {imageData.analysis_results.message}
                       </div>
                     )}
@@ -257,30 +250,26 @@ const AdminAnalysis = () => {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                <p className="text-muted-foreground">No analysis results available</p>
+              <div className="text-center py-6 sm:py-8">
+                <AlertTriangle className="h-8 w-8 sm:h-12 sm:w-12 text-yellow-500 mx-auto mb-3 sm:mb-4" />
+                <p className="text-muted-foreground text-sm sm:text-base">No analysis results available</p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-             {/* Mobile Actions */}
-       <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t p-3">
-         <div className="flex gap-2">
-           <Button asChild className="flex-1">
-             <Link to="/admin/uploads">Back</Link>
-           </Button>
-           <Button variant="outline" className="flex-1">
-             <Download className="h-4 w-4 mr-2" />
-             Export
-           </Button>
-         </div>
-       </div>
-       
-       {/* Mobile bottom padding to prevent content from being hidden behind fixed actions */}
-       <div className="sm:hidden h-20"></div>
+      {/* Mobile Actions */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-gradient-to-r from-green-50 to-blue-50/95 backdrop-blur border-t border-green-200 p-3">
+        <div className="flex gap-2">
+          <Button asChild className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white border-0">
+            <Link to="/admin/uploads">Back</Link>
+          </Button>
+        </div>
+      </div>
+      
+      {/* Mobile bottom padding to prevent content from being hidden behind fixed actions */}
+      <div className="sm:hidden h-20"></div>
     </div>
   );
 };
