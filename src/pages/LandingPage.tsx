@@ -271,7 +271,7 @@ const LandingPage = () => {
               </p>
               <div className="flex items-center gap-3">
                 <a 
-                  href="mailto:sanidhyapatel49@gmail.com" 
+                  href="mailto:iamsanskar347@gmail.com" 
                   className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
                   title="Email us"
                 >
@@ -287,7 +287,7 @@ const LandingPage = () => {
                   <Github className="h-5 w-5" />
                 </a>
                 <a 
-                  href="https://linkedin.com" 
+                  href="https://www.linkedin.com/in/sanskar-patel-b6222b2b2?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
