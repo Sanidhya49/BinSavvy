@@ -371,7 +371,7 @@ const Index = () => {
               </p>
               <div className="flex items-center justify-center md:justify-start gap-4">
                 <a 
-                  href="mailto:sanidhyapatel49@gmail.com" 
+                  href="mailto:iamsanskar347@gmail.com" 
                   className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center hover:from-green-500 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl hover:scale-110"
                   title="Email us"
                 >
@@ -387,7 +387,7 @@ const Index = () => {
                   <Github className="h-6 w-6 text-white" />
                 </a>
                 <a 
-                  href="https://linkedin.com" 
+                  href="https://www.linkedin.com/in/sanskar-patel-b6222b2b2?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center hover:from-green-500 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl hover:scale-110"
