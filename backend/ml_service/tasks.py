@@ -328,10 +328,10 @@ def process_image_with_yolo_sync(image_id: str, image_url: str, location: str = 
                 if processed_image_path != temp_file_path and os.path.exists(processed_image_path):
                     os.unlink(processed_image_path)
                     
-                         except Exception as upload_error:
-                 print(f"Error uploading processed image: {upload_error}")
-                 # Fallback to original image
-                 processed_image_url = image_url
+            except Exception as upload_error:
+                print(f"Error uploading processed image: {upload_error}")
+                # Fallback to original image
+                processed_image_url = image_url
         
         return {
             'image_id': image_id,

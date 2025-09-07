@@ -18,8 +18,12 @@ from cloudinary_config import upload_image as cloudinary_upload_image, delete_im
 try:
     from ml_service.tasks import process_image
     ML_AVAILABLE = True
+    print("DEBUG: ML tasks imported successfully")
 except Exception as e:
-    print(f"ML tasks not available: {str(e)}")
+    print(f"ERROR: ML tasks not available: {str(e)}")
+    print(f"ERROR: This will cause 'ML Unavailable' status")
+    import traceback
+    traceback.print_exc()
     ML_AVAILABLE = False
 
 # In-memory storage for demo (in production, this would be a database)
@@ -247,10 +251,18 @@ def get_user_images(request):
         # Migrate existing images to add user_id
         migrate_existing_images()
         
-        # Filter images by user_id
-        user_images = [img for img in uploaded_images if img.get('user_id') == user_id]
+        # Check if this is an admin user (user_id '1' or 'admin')
+        is_admin = user_id in ['1', 'admin']
         
-        print(f"Returning {len(user_images)} images for user {user_id}")
+        if is_admin:
+            # Admin can see all images
+            user_images = uploaded_images
+            print(f"Admin user {user_id} - returning all {len(user_images)} images")
+            print(f"DEBUG: All uploaded images: {[img.get('image_id', 'no-id') for img in uploaded_images]}")
+        else:
+            # Regular users only see their own images
+            user_images = [img for img in uploaded_images if img.get('user_id') == user_id]
+            print(f"Regular user {user_id} - returning {len(user_images)} images")
         
         return Response({
             'message': 'Images retrieved successfully',

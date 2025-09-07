@@ -16,8 +16,16 @@ class RoboflowConfig:
         self.model_id = os.getenv('ROBOFLOW_MODEL_ID', "garbage-det-t1lur/1")
         self.api_url = "https://serverless.roboflow.com"
         
+        print(f"DEBUG: RoboflowConfig initialization")
+        print(f"DEBUG: ROBOFLOW_API_KEY present: {bool(self.api_key)}")
+        print(f"DEBUG: ROBOFLOW_MODEL_ID: {self.model_id}")
+        print(f"DEBUG: API URL: {self.api_url}")
+        
         if not self.api_key:
-            raise ValueError("ROBOFLOW_API_KEY not found in environment variables")
+            print("ERROR: ROBOFLOW_API_KEY not found in environment variables")
+            print("ERROR: Please set ROBOFLOW_API_KEY in your environment")
+            # Don't raise error immediately, allow graceful degradation
+            self.api_key = None
     
     def predict_image(self, image_path: str, confidence_threshold: float = 0.1) -> Dict[str, Any]:
         """
@@ -74,6 +82,12 @@ class RoboflowConfig:
             Dictionary containing prediction results
         """
         try:
+            # Check if API key is available
+            if not self.api_key:
+                error_msg = "Roboflow API key not configured. Please set ROBOFLOW_API_KEY environment variable."
+                print(f"ERROR: {error_msg}")
+                return {"error": error_msg, "predictions": []}
+            
             url = f"{self.api_url}/{self.model_id}"
             headers = {
                 "Content-Type": "application/x-www-form-urlencoded"
@@ -87,7 +101,7 @@ class RoboflowConfig:
             print(f"DEBUG: Roboflow API call - URL: {url}")
             print(f"DEBUG: Roboflow API call - Params: {params}")
             
-            response = requests.post(url, headers=headers, params=params)
+            response = requests.post(url, headers=headers, params=params, timeout=30)
             
             print(f"DEBUG: Roboflow API response status: {response.status_code}")
             print(f"DEBUG: Roboflow API response text: {response.text[:500]}...")  # First 500 chars
@@ -97,11 +111,14 @@ class RoboflowConfig:
                 print(f"DEBUG: Roboflow API response JSON: {result}")
                 return result
             else:
-                raise Exception(f"API request failed with status {response.status_code}: {response.text}")
+                error_msg = f"API request failed with status {response.status_code}: {response.text}"
+                print(f"ERROR: {error_msg}")
+                return {"error": error_msg, "predictions": []}
                 
         except Exception as e:
-            print(f"Error in Roboflow prediction from URL: {str(e)}")
-            return {"error": str(e)}
+            error_msg = f"Error in Roboflow prediction from URL: {str(e)}"
+            print(f"ERROR: {error_msg}")
+            return {"error": error_msg, "predictions": []}
     
     def analyze_predictions(self, predictions: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -153,5 +170,23 @@ class RoboflowConfig:
             print(f"Error analyzing predictions: {str(e)}")
             return {"error": str(e)}
 
-# Create global instance
-roboflow_config = RoboflowConfig() 
+# Create global instance with error handling
+try:
+    roboflow_config = RoboflowConfig()
+    print("DEBUG: RoboflowConfig initialized successfully")
+except Exception as e:
+    print(f"ERROR: Failed to initialize RoboflowConfig: {str(e)}")
+    # Create a dummy config to prevent import errors
+    class DummyRoboflowConfig:
+        def __init__(self):
+            self.api_key = None
+            self.model_id = "garbage-det-t1lur/1"
+            self.api_url = "https://serverless.roboflow.com"
+        
+        def predict_image_from_url(self, image_url, confidence_threshold=0.1):
+            return {"error": "Roboflow not configured", "predictions": []}
+        
+        def analyze_predictions(self, predictions):
+            return {"error": "Roboflow not configured", "total_detections": 0}
+    
+    roboflow_config = DummyRoboflowConfig() 
